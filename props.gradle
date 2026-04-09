@@ -1,0 +1,49 @@
+import java.util.stream.Collectors
+
+def configProps = new Properties()
+try (def reader = file("config.properties").newReader()) {
+    configProps.load(reader)
+}
+
+def configSource = configProps.get("source")
+if (!configSource) {
+    throw new IllegalStateException("No source specified in config.properties")
+}
+
+def availableConfigs = file("sources").listFiles().toList()
+def foundSource = availableConfigs.find {it.name == configSource}
+if (!foundSource) {
+    throw new IllegalStateException("Source " + configSource + ".gradle not found")
+}
+
+apply from: 'source.gradle'
+apply from: foundSource
+
+if (!ext.configuredSource) {
+    throw new IllegalStateException("File " + configSource + ".gradle did not add any source")
+}
+
+def sourceDir = ext.configuredSource.queryLocation()
+if (!sourceDir) {
+    throw new IllegalStateException("Source directory query failed")
+}
+
+def allModules = file("$sourceDir/modules").listFiles().toList().stream()
+        .map {f -> f.name}
+        .filter {s -> !s.endsWith("swt")}
+        .collect(Collectors.<String, String,String>toMap(s -> s, s -> {
+            s.contains("incubator") ? s.split("\\.", 2)[1] : s.split("\\.").last()
+        }))
+
+def args = [
+        "--enable-native-access=ALL-UNNAMED",
+        "--sun-misc-unsafe-memory-access=allow",
+        "-Djavafx.enablePreview=true"
+]
+
+ext {
+    activeSource = configSource
+    jfxDir = sourceDir
+    jfxModules = allModules
+    jvmRunArgs = args
+}

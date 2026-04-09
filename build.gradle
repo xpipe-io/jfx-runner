@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+apply from: "props.gradle"
+
+repositories {
+    mavenCentral()
+}
+
+clean {
+    dependsOn(gradle.includedBuild('jfx').task(":clean"))
+}
+
+compileJava {
+    dependsOn(gradle.includedBuild('jfx').task(":sdk"))
+}
+
+dependencies {
+    for (def mod in jfxModules.entrySet()) {
+        implementation ("io.openjfx:${mod.key.replaceAll("\\.", "-")}")
+        implementation files("$jfxDir/build/sdk/lib/${mod.key}.jar")
+    }
+
+    implementation files(fileTree("$jfxDir/build/libs").files)
+}
+
+def sourceSet = project.sourceSets.main.java
+def runnerPackage = project.sourceSets.main.java.files.stream()
+        .filter{ (it.name == 'Main.java') }
+        .findFirst()
+        .map{ sourceSet.srcDirs[0].relativePath(it.parentFile).replace('/', '.') }
+        .orElse("io.xpipe")
+
+application {
+    mainClass = "${runnerPackage}.Main"
+    applicationDefaultJvmArgs = jvmRunArgs
+}

@@ -1,0 +1,11 @@
+rootProject.name = 'jfx-runner'
+
+apply from: "props.gradle"
+
+includeBuild(jfxDir) {
+    dependencySubstitution {
+        for (def mod in jfxModules.entrySet()) {
+            substitute module("io.openjfx:${mod.key.replaceAll("\\.", "-")}") using project(":$mod.value")
+        }
+    }
+}

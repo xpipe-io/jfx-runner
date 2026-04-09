@@ -1,0 +1,74 @@
+interface JfxSource {
+
+    File queryLocation();
+}
+
+ext {
+    configuredSource = null;
+}
+
+def local(File dir) {
+    if (!dir.isDirectory()) {
+        throw new IllegalArgumentException("Directory " + dir + " does not exist")
+    }
+
+    configuredSource = new JfxSource() {
+
+        @Override
+        File queryLocation() {
+            return dir
+        }
+    }
+}
+
+def exec(File dir, String... args) {
+    def proc = new ProcessBuilder(args).directory(dir).start()
+    new Thread() {
+        @Override
+        void run() {
+            proc.getInputStream().transferTo(System.out)
+        }
+    }.start()
+    new Thread() {
+        @Override
+        void run() {
+            proc.getErrorStream().transferTo(System.err)
+        }
+    }.start()
+    proc.waitFor()
+    if (proc.exitValue() != 0) {
+        throw new IOException("Command failed")
+    }
+}
+
+def git(String repo, String ref) {
+    if (configuredSource) {
+        return
+    }
+
+    configuredSource = new JfxSource() {
+
+        @Override
+        File queryLocation() {
+            def name = repo.substring(repo.indexOf("/") + 1)
+            def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
+            tempDir.mkdirs()
+            if (tempDir.listFiles().size() == 0) {
+                exec(null, "git", "clone", repo, tempDir.toString())
+            }
+            exec(tempDir, "git", "pull")
+            exec(tempDir, "git", "checkout", ref)
+            tempDir
+        }
+    }
+}
+
+def buildProperties(String... props) {
+
+}
+
+ext {
+    local = this.&local
+    git = this.&git
+    buildProperties = this.&buildProperties
+}
