@@ -28,6 +28,33 @@ if (!sourceDir) {
     throw new IllegalStateException("Source directory query failed")
 }
 
+
+
+def configTarget = configProps.get("target")
+if (!configTarget) {
+    throw new IllegalStateException("No target specified in config.properties")
+}
+
+def availableTargets = file("targets").listFiles().toList()
+def foundTarget = availableTargets.find {it.name == configTarget}
+if (!foundTarget) {
+    throw new IllegalStateException("Target " + configTarget + ".gradle not found")
+}
+
+apply from: 'target.gradle'
+apply from: foundTarget
+
+if (!ext.configuredTarget) {
+    throw new IllegalStateException("File " + configTarget + ".gradle did not add any source")
+}
+
+def targetConfigDir = ext.configuredTarget.queryLocation()
+if (!targetConfigDir) {
+    throw new IllegalStateException("Target directory query failed")
+}
+
+
+
 def allModules = file("$sourceDir/modules").listFiles().toList().stream()
         .map {f -> f.name}
         .filter {s -> !s.endsWith("swt")}
@@ -47,4 +74,5 @@ ext {
     jfxModules = allModules
     jvmRunArgs = args
     jfxBuildProperties = configuredBuildProperties
+    targetDir = targetConfigDir
 }

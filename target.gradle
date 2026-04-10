@@ -1,0 +1,88 @@
+interface JfxTarget {
+
+    File queryLocation();
+}
+
+ext {
+    configuredTarget = null
+    configuredTargetTask = null;
+    configuredTargetJvmArgs = []
+}
+
+def directory(File dir) {
+    if (!dir.isDirectory()) {
+        throw new IllegalArgumentException("Directory " + dir + " does not exist")
+    }
+
+    configuredTarget = new JfxTarget() {
+
+        @Override
+        File queryLocation() {
+            return dir
+        }
+    }
+}
+
+def exec(File dir, String... args) {
+    def proc = new ProcessBuilder(args).directory(dir).start()
+    new Thread() {
+        @Override
+        void run() {
+            proc.getInputStream().transferTo(System.out)
+        }
+    }.start()
+    new Thread() {
+        @Override
+        void run() {
+            proc.getErrorStream().transferTo(System.err)
+        }
+    }.start()
+    proc.waitFor()
+    if (proc.exitValue() != 0) {
+        throw new IOException("Command failed")
+    }
+}
+
+def git(String repo, String ref) {
+    if (configuredTarget) {
+        return
+    }
+
+    configuredTarget = new JfxTarget() {
+
+        @Override
+        File queryLocation() {
+            def uri = URI.create(repo)
+            def name = uri.getPath()
+            def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
+            println("Cloning source into directory " + tempDir + " ...")
+            tempDir.mkdirs()
+            if (tempDir.listFiles().size() == 0) {
+                exec(null, "git", "clone", repo, tempDir.toString())
+            }
+            exec(tempDir, "git", "pull")
+            exec(tempDir, "git", "checkout", ref)
+            return tempDir
+        }
+    }
+}
+
+def gradleTask(String identifier) {
+    configuredTargetTask = identifier
+}
+
+def jvmArgs(String... props) {
+    configuredTargetJvmArgs += props.toList()
+}
+
+def target(Closure c) {
+    c.run()
+}
+
+ext {
+    directory = this.&directory
+    git = this.&git
+    jvmArgs = this.&jvmArgs
+    target = this.&target
+    gradleTask = this.&gradleTask
+}

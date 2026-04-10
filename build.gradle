@@ -17,6 +17,10 @@ compileJava {
     dependsOn(gradle.includedBuild('jfx').task(":sdk"))
 }
 
+run {
+    dependsOn(gradle.includedBuild('target').task(":$configuredTargetTask"))
+}
+
 dependencies {
     for (def mod in jfxModules.entrySet()) {
         implementation ("io.openjfx:${mod.key.replaceAll("\\.", "-")}")
