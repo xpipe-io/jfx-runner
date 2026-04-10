@@ -46,4 +46,5 @@ ext {
     jfxDir = sourceDir
     jfxModules = allModules
     jvmRunArgs = args
+    jfxBuildProperties = configuredBuildProperties
 }

@@ -5,6 +5,7 @@ interface JfxSource {
 
 ext {
     configuredSource = null;
+    configuredBuildProperties = []
 }
 
 def local(File dir) {
@@ -50,25 +51,32 @@ def git(String repo, String ref) {
 
         @Override
         File queryLocation() {
-            def name = repo.substring(repo.indexOf("/") + 1)
+            def uri = URI.create(repo)
+            def name = uri.getPath()
             def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
+            println("Cloning source into directory " + tempDir + " ...")
             tempDir.mkdirs()
             if (tempDir.listFiles().size() == 0) {
                 exec(null, "git", "clone", repo, tempDir.toString())
             }
             exec(tempDir, "git", "pull")
             exec(tempDir, "git", "checkout", ref)
-            tempDir
+            return tempDir
         }
     }
 }
 
 def buildProperties(String... props) {
+    configuredBuildProperties += props.toList()
+}
 
+def source(Closure c) {
+    c.run()
 }
 
 ext {
     local = this.&local
     git = this.&git
     buildProperties = this.&buildProperties
+    source = this.&source
 }
