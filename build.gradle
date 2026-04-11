@@ -13,8 +13,17 @@ clean {
     dependsOn(gradle.includedBuild('jfx').task(":clean"))
 }
 
-if (file(layout.buildDirectory.dir("generated/sources/$configuredTargetName")).exists()) {
+configuredTarget.prepare()
 
+def generatedSrcDir = file(layout.buildDirectory.dir("generated/sources/$configuredTargetName"))
+if (generatedSrcDir.exists()) {
+    sourceSets {
+        main {
+            java {
+                srcDir(generatedSrcDir)
+            }
+        }
+    }
 }
 
 dependencies {

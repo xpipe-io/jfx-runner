@@ -13,6 +13,7 @@ ext {
 }
 
 def sourceFile(String path) {
+    configuredTargetName = path
     configuredTarget = new JfxTarget() {
 
         @Override
@@ -26,13 +27,16 @@ def sourceFile(String path) {
 }
 
 def externalFile(File file) {
+    configuredTargetName = file.name
     configuredTarget = new JfxTarget() {
 
         @Override
         void prepare() {
+            def dir = layout.buildDirectory.dir("generated/sources/$file.name/main/java").get()
+            println("Creating source set dir " + dir + " for external source " + file)
             copy {
                 from(file)
-                into(layout.buildDirectory.dir("generated/sources/$configuredTargetName/main/java"))
+                into(dir)
             }
         }
 
@@ -43,36 +47,31 @@ def externalFile(File file) {
     }
 }
 
-def exec(File dir, String... args) {
-    def proc = new ProcessBuilder(args).directory(dir).start()
-    new Thread() {
-        @Override
-        void run() {
-            proc.getInputStream().transferTo(System.out)
-        }
-    }.start()
-    new Thread() {
-        @Override
-        void run() {
-            proc.getErrorStream().transferTo(System.err)
-        }
-    }.start()
-    proc.waitFor()
-    if (proc.exitValue() != 0) {
-        throw new IOException("Command failed")
-    }
-}
+def url(String url) {
+    def parsedUrl = URI.create(url).toURL()
+    def name = parsedUrl.getPath().split("/").last().split("\\.").first()
+    configuredTargetName = name
+    configuredTarget = new JfxTarget() {
 
-def gradleTask(String identifier) {
-    configuredTargetTask = identifier
+        @Override
+        void prepare() {
+            def file = layout.buildDirectory.dir("generated/sources/$name/main/java").get().file("${name}.java")
+            println("Download file from $url to to $file")
+            parsedUrl.withInputStream{ i -> file.withOutputStream{ it << i }}
+        }
+
+        @Override
+        String queryApplicationClass() {
+            return name
+        }
+    }
 }
 
 def jvmArgs(String... props) {
     configuredTargetJvmArgs += props.toList()
 }
 
-def target(String name, Closure c) {
-    configuredTargetName = name
+def target(Closure c) {
     c.run()
 }
 
@@ -81,5 +80,4 @@ ext {
     externalFile = this.&externalFile
     jvmArgs = this.&jvmArgs
     target = this.&target
-    gradleTask = this.&gradleTask
 }
