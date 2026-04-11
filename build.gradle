@@ -13,12 +13,8 @@ clean {
     dependsOn(gradle.includedBuild('jfx').task(":clean"))
 }
 
-compileJava {
-    dependsOn(gradle.includedBuild('jfx').task(":sdk"))
-}
+if (file(layout.buildDirectory.dir("generated/sources/$configuredTargetName")).exists()) {
 
-run {
-    dependsOn(gradle.includedBuild('target').task(":$configuredTargetTask"))
 }
 
 dependencies {
@@ -39,5 +35,5 @@ def runnerPackage = project.sourceSets.main.java.files.stream()
 
 application {
     mainClass = "${runnerPackage}.Main"
-    applicationDefaultJvmArgs = jvmRunArgs
+    applicationDefaultJvmArgs = targetJvmArgs
 }

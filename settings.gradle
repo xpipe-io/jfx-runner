@@ -24,9 +24,3 @@ includeBuild(jfxDir) {
         }
     }
 }
-
-if (targetDir != rootDir) {
-    includeBuild(targetDir) {
-        setName("target")
-    }
-}

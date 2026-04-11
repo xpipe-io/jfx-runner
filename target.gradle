@@ -1,24 +1,44 @@
 interface JfxTarget {
 
-    File queryLocation();
+    void prepare();
+
+    String queryApplicationClass();
 }
 
 ext {
+    configuredTargetName = null;
     configuredTarget = null
     configuredTargetTask = null;
     configuredTargetJvmArgs = []
 }
 
-def directory(File dir) {
-    if (!dir.isDirectory()) {
-        throw new IllegalArgumentException("Directory " + dir + " does not exist")
-    }
-
+def sourceFile(String path) {
     configuredTarget = new JfxTarget() {
 
         @Override
-        File queryLocation() {
-            return dir
+        void prepare() {}
+
+        @Override
+        String queryApplicationClass() {
+            return path
+        }
+    }
+}
+
+def externalFile(File file) {
+    configuredTarget = new JfxTarget() {
+
+        @Override
+        void prepare() {
+            copy {
+                from(file)
+                into(layout.buildDirectory.dir("generated/sources/$configuredTargetName/main/java"))
+            }
+        }
+
+        @Override
+        String queryApplicationClass() {
+            return file.name
         }
     }
 }
@@ -43,30 +63,6 @@ def exec(File dir, String... args) {
     }
 }
 
-def git(String repo, String ref) {
-    if (configuredTarget) {
-        return
-    }
-
-    configuredTarget = new JfxTarget() {
-
-        @Override
-        File queryLocation() {
-            def uri = URI.create(repo)
-            def name = uri.getPath()
-            def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
-            println("Cloning source into directory " + tempDir + " ...")
-            tempDir.mkdirs()
-            if (tempDir.listFiles().size() == 0) {
-                exec(null, "git", "clone", repo, tempDir.toString())
-            }
-            exec(tempDir, "git", "pull")
-            exec(tempDir, "git", "checkout", ref)
-            return tempDir
-        }
-    }
-}
-
 def gradleTask(String identifier) {
     configuredTargetTask = identifier
 }
@@ -75,13 +71,14 @@ def jvmArgs(String... props) {
     configuredTargetJvmArgs += props.toList()
 }
 
-def target(Closure c) {
+def target(String name, Closure c) {
+    configuredTargetName = name
     c.run()
 }
 
 ext {
-    directory = this.&directory
-    git = this.&git
+    sourceFile = this.&sourceFile
+    externalFile = this.&externalFile
     jvmArgs = this.&jvmArgs
     target = this.&target
     gradleTask = this.&gradleTask

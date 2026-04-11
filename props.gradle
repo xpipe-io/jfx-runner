@@ -5,9 +5,13 @@ try (def reader = file("config.properties").newReader()) {
     configProps.load(reader)
 }
 
-def configSource = configProps.get("source")
+def configSource = (String) configProps.get("source")
 if (!configSource) {
     throw new IllegalStateException("No source specified in config.properties")
+}
+
+if (!configSource.endsWith(".gradle")) {
+    configSource += ".gradle"
 }
 
 def availableConfigs = file("sources").listFiles().toList()
@@ -17,6 +21,7 @@ if (!foundSource) {
 }
 
 apply from: 'source.gradle'
+println("Applying source config $foundSource")
 apply from: foundSource
 
 if (!ext.configuredSource) {
@@ -30,9 +35,13 @@ if (!sourceDir) {
 
 
 
-def configTarget = configProps.get("target")
+def configTarget = (String) configProps.get("target")
 if (!configTarget) {
     throw new IllegalStateException("No target specified in config.properties")
+}
+
+if (!configTarget.endsWith(".gradle")) {
+    configTarget += ".gradle"
 }
 
 def availableTargets = file("targets").listFiles().toList()
@@ -42,15 +51,11 @@ if (!foundTarget) {
 }
 
 apply from: 'target.gradle'
+println("Applying target config $foundTarget")
 apply from: foundTarget
 
 if (!ext.configuredTarget) {
     throw new IllegalStateException("File " + configTarget + ".gradle did not add any source")
-}
-
-def targetConfigDir = ext.configuredTarget.queryLocation()
-if (!targetConfigDir) {
-    throw new IllegalStateException("Target directory query failed")
 }
 
 
@@ -72,7 +77,8 @@ ext {
     activeSource = configSource
     jfxDir = sourceDir
     jfxModules = allModules
-    jvmRunArgs = args
     jfxBuildProperties = configuredBuildProperties
-    targetDir = targetConfigDir
+
+    targetJvmArgs = args + configuredTargetJvmArgs
+    targetApplication = configuredTargetName
 }
