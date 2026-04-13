@@ -27,3 +27,8 @@ includeBuild(jfxDir.toPath().toRealPath().toAbsolutePath().toString()) {
         }
     }
 }
+
+if (configuredTarget.includeProject()) {
+    def dir = configuredTarget.prepareDirectory()
+    includeBuild(dir)
+}

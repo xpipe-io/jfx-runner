@@ -13,14 +13,22 @@ clean {
     dependsOn(gradle.includedBuild('jfx').task(":clean"))
 }
 
-configuredTarget.prepare()
+if (configuredTarget.includeProject()) {
+    def task = configuredTarget.getIncludedProjectRunTask()
+    if (task != null) {
+        run {
+            dependsOn(gradle.includedBuild(configuredTargetName).task(task))
+        }
+    }
+}
 
-def generatedSrcDir = file(layout.buildDirectory.dir("generated/sources/$configuredTargetName"))
-if (generatedSrcDir.exists()) {
+def targetDir = configuredTarget.prepareDirectory()
+println("Prepared external source set dir $targetDir")
+if (targetDir != null && targetDir.exists()) {
     sourceSets {
         main {
             java {
-                srcDir(generatedSrcDir)
+                srcDir(targetDir)
             }
         }
     }
@@ -35,14 +43,14 @@ dependencies {
     implementation files(fileTree("$jfxDir/build/libs").files)
 }
 
-def sourceSet = project.sourceSets.main.java
-def runnerPackage = project.sourceSets.main.java.files.stream()
-        .filter{ (it.name == 'Main.java') }
-        .findFirst()
-        .map{ sourceSet.srcDirs[0].relativePath(it.parentFile).replace('/', '.') }
-        .orElse("io.xpipe")
+if (configuredTarget.runWithinGradle()) {
+    application {
+        mainClass = configuredTarget.queryApplicationClass()
+        applicationDefaultJvmArgs = targetJvmArgs
 
-application {
-    mainClass = "${runnerPackage}.Main"
-    applicationDefaultJvmArgs = targetJvmArgs
+        println()
+        println("Running target with gradle application plugin")
+        println("Target main class: ${mainClass.get()}")
+        println("Target JVM args: $applicationDefaultJvmArgs")
+    }
 }
