@@ -22,7 +22,9 @@ def local(File dir) {
     }
 }
 
-def exec(File dir, String... args) {
+def exec(File dir, boolean fail, String... args) {
+    def joined = String.join(" ", args)
+    println("Running $joined")
     def proc = new ProcessBuilder(args).directory(dir).start()
     new Thread() {
         @Override
@@ -37,8 +39,8 @@ def exec(File dir, String... args) {
         }
     }.start()
     proc.waitFor()
-    if (proc.exitValue() != 0) {
-        throw new IOException("Command failed")
+    if (fail && proc.exitValue() != 0) {
+        throw new IOException("Command $joined failed")
     }
 }
 
@@ -57,10 +59,44 @@ def git(String repo, String ref) {
             println("Cloning source into directory " + tempDir + " ...")
             tempDir.mkdirs()
             if (tempDir.listFiles().size() == 0) {
-                exec(null, "git", "clone", repo, tempDir.toString())
+                exec(null, true, "git", "clone", repo, tempDir.toString())
             }
-            exec(tempDir, "git", "pull")
-            exec(tempDir, "git", "checkout", ref)
+            exec(tempDir, true, "git", "pull")
+            exec(tempDir, true, "git", "checkout", ref)
+            return tempDir
+        }
+    }
+}
+
+def prUrl(String url) {
+    def prefix = "https://github.com/openjdk/jfx/pull/"
+    if (!url.startsWith(prefix)) {
+        throw new IllegalArgumentException("Invalid PR URL format")
+    }
+
+    def id = Integer.parseInt(url.substring(prefix.length()))
+    prId(id)
+}
+
+def prId(int id) {
+    if (configuredSource) {
+        return
+    }
+
+    configuredSource = new JfxSource() {
+
+        @Override
+        File queryLocation() {
+            def uri = URI.create("https://github.com/openjdk/jfx")
+            def name = uri.getPath()
+            def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
+            println("Cloning source into directory " + tempDir + " ...")
+            tempDir.mkdirs()
+            if (tempDir.listFiles().size() == 0) {
+                exec(null, true, "git", "clone", repo, tempDir.toString())
+            }
+            exec(tempDir, false, "git", "fetch", "origin", "pull/" + id + "/head:" + id)
+            exec(tempDir, true, "git", "checkout", "" + id)
             return tempDir
         }
     }
@@ -77,6 +113,8 @@ def source(Closure c) {
 ext {
     local = this.&local
     git = this.&git
+    prUrl = this.&prUrl
+    prId = this.&prId
     buildProperties = this.&buildProperties
     source = this.&source
 }
