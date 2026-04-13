@@ -1,0 +1,3 @@
+target {
+    externalGradleProject(file("C:\\Projects\\xpipe\\kickstartfx"), ":app:run")
+}

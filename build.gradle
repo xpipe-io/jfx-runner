@@ -13,18 +13,23 @@ clean {
     dependsOn(gradle.includedBuild('jfx').task(":clean"))
 }
 
+def targetDir = configuredTarget.prepareDirectory()
+
 if (configuredTarget.includeProject()) {
+    def projectName = targetDir.name
     def task = configuredTarget.getIncludedProjectRunTask()
     if (task != null) {
         run {
-            dependsOn(gradle.includedBuild(configuredTargetName).task(task))
+            dependsOn(gradle.includedBuild(projectName).task(task))
+        }
+        clean {
+            dependsOn(gradle.includedBuild(projectName).task(":clean"))
         }
     }
 }
 
-def targetDir = configuredTarget.prepareDirectory()
-println("Prepared external source set dir $targetDir")
-if (targetDir != null && targetDir.exists()) {
+if (configuredTargetCustomRun == null && !configuredTarget.includeProject() && targetDir != null && targetDir.exists()) {
+    println("Applying external source set dir $targetDir")
     sourceSets {
         main {
             java {
@@ -32,18 +37,26 @@ if (targetDir != null && targetDir.exists()) {
             }
         }
     }
+} else {
+    sourceSets {
+        main {
+            java {
+                srcDirs = []
+            }
+        }
+    }
 }
 
-dependencies {
-    for (def mod in jfxModules.entrySet()) {
-        implementation ("io.openjfx:${mod.key.replaceAll("\\.", "-")}")
-        implementation files("$jfxDir/build/sdk/lib/${mod.key}.jar")
+if (configuredTargetCustomRun == null && configuredTarget.runWithinGradle()) {
+    dependencies {
+        for (def mod in jfxModules.entrySet()) {
+            implementation ("io.openjfx:${mod.key.replaceAll("\\.", "-")}")
+            implementation files("$jfxDir/build/sdk/lib/${mod.key}.jar")
+        }
+
+        implementation files(fileTree("$jfxDir/build/libs").files)
     }
 
-    implementation files(fileTree("$jfxDir/build/libs").files)
-}
-
-if (configuredTarget.runWithinGradle()) {
     application {
         mainClass = configuredTarget.queryApplicationClass()
         applicationDefaultJvmArgs = targetJvmArgs
@@ -52,5 +65,14 @@ if (configuredTarget.runWithinGradle()) {
         println("Running target with gradle application plugin")
         println("Target main class: ${mainClass.get()}")
         println("Target JVM args: $applicationDefaultJvmArgs")
+    }
+}
+
+else if (configuredTargetCustomRun != null) {
+    run {
+        doFirst {
+            println("Running custom exec")
+            configuredTargetCustomRun(targetDir, jfxDir)
+        }
     }
 }

@@ -22,28 +22,6 @@ def local(File dir) {
     }
 }
 
-def exec(File dir, boolean fail, String... args) {
-    def joined = String.join(" ", args)
-    println("Running $joined")
-    def proc = new ProcessBuilder(args).directory(dir).start()
-    new Thread() {
-        @Override
-        void run() {
-            proc.getInputStream().transferTo(System.out)
-        }
-    }.start()
-    new Thread() {
-        @Override
-        void run() {
-            proc.getErrorStream().transferTo(System.err)
-        }
-    }.start()
-    proc.waitFor()
-    if (fail && proc.exitValue() != 0) {
-        throw new IOException("Command $joined failed")
-    }
-}
-
 def git(String repo, String ref) {
     if (configuredSource) {
         return

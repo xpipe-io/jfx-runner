@@ -1,3 +1,5 @@
+import java.util.function.Consumer
+
 interface JfxTarget {
 
     File prepareDirectory();
@@ -14,11 +16,9 @@ interface JfxTarget {
 }
 
 ext {
-    configuredTargetName = null;
     configuredTarget = null
-    configuredTargetRunWithGradle = null
-    configuredTargetTask = null;
     configuredTargetJvmArgs = []
+    configuredTargetCustomRun = null
 }
 
 def getPackage(String content) {
@@ -33,7 +33,6 @@ def getPackage(String content) {
 }
 
 def sourceFile(String path) {
-    configuredTargetName = path
     configuredTarget = new JfxTarget() {
 
         @Override
@@ -63,7 +62,6 @@ def externalFile(File external) {
         throw new IllegalArgumentException("Unable to find external file $external")
     }
 
-    configuredTargetName = external.name
     configuredTarget = new JfxTarget() {
 
         @Override
@@ -98,7 +96,6 @@ def externalSourceDirectory(File dir, String mainClass) {
         throw new IllegalArgumentException("Unable to find external directory $dir")
     }
 
-    configuredTargetName = dir.name
     configuredTarget = new JfxTarget() {
 
         @Override
@@ -128,7 +125,6 @@ def externalGradleProject(File dir, String runTask) {
         throw new IllegalArgumentException("Unable to find external directory $dir")
     }
 
-    configuredTargetName = dir.name
     configuredTarget = new JfxTarget() {
 
         @Override
@@ -166,7 +162,6 @@ def urlFile(String url) {
 
     def parsedUrl = URI.create(url).toURL()
     def name = parsedUrl.getPath().split("/").last().split("\\.").first()
-    configuredTargetName = name
     configuredTarget = new JfxTarget() {
 
         @Override
@@ -207,6 +202,10 @@ def urlFile(String url) {
     }
 }
 
+def customExec(Closure c) {
+    configuredTargetCustomRun = c
+}
+
 def jvmArgs(String... props) {
     configuredTargetJvmArgs += props.toList()
 }
@@ -219,7 +218,9 @@ ext {
     sourceFile = this.&sourceFile
     externalFile = this.&externalFile
     externalSourceDirectory = this.&externalSourceDirectory
+    externalGradleProject = this.&externalGradleProject
     urlFile = this.&urlFile
     jvmArgs = this.&jvmArgs
+    customExec = this.&customExec
     target = this.&target
 }
