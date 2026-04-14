@@ -1,3 +1,5 @@
+import java.util.regex.Matcher
+
 plugins {
     id 'java'
     id 'application'
@@ -61,17 +63,29 @@ if (activeTargetCustomRun == null && !activeTarget.includeProject() && targetDir
         launcherPackage.mkdirs()
 
         def appClass = activeTarget.queryApplicationClass()
+
+        String mainClassText;
+        project.sourceSets.every {
+            it.java.each { file ->
+                if (!mainClassText && file.toString().contains(appClass.replaceAll("\\.", Matcher.quoteReplacement(File.separator)))) {
+                    mainClassText = file.text
+                }
+            }
+        }
+
+        def hasMain = mainClassText && mainClassText.contains("static void main")
+        def mainCall = hasMain ? "${appClass}.main(args);" : "Application.launch(${appClass}.class);"
+
         def launcherText = """package io.xpipe.jfx_runner;
 
 import javafx.application.Application;
-import %s;
 
 public class Launcher {
     public static void main(String[] args) {
-        Application.launch(%s.class);
+        $mainCall
     }
 }
-        """.formatted(appClass, appClass.split("\\.").last())
+        """
         def launcherFile = file("$launcherPackage/Launcher.java")
         launcherFile.text = launcherText
 

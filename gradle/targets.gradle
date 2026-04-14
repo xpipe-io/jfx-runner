@@ -38,7 +38,7 @@ def getPackage(String content) {
     return pkg
 }
 
-def sourceFile(String path) {
+def sourceFile(String cls) {
     configuredTarget = new JfxTarget() {
 
         @Override
@@ -48,7 +48,7 @@ def sourceFile(String path) {
 
         @Override
         String queryApplicationClass() {
-            return path
+            return cls
         }
 
         @Override
@@ -63,7 +63,7 @@ def sourceFile(String path) {
 
         @Override
         boolean requiresLauncher() {
-            def sourceText = file("$rootDir/src/main/java/${path.replaceAll("\\.", "")}.java").text
+            def sourceText = file("$rootDir/src/main/java/${cls.replaceAll("\\.", "/")}.java").text
             def isApplication = sourceText.contains("extends Application")
             return isApplication
         }
@@ -138,7 +138,7 @@ def externalSourceDirectory(File dir, String mainClass) {
 
         @Override
         boolean requiresLauncher() {
-            def sourceText = file("$dir/${path.replaceAll("\\.", "")}.java").text
+            def sourceText = file("$dir/${path.replaceAll("\\.", "/")}.java").text
             def isApplication = sourceText.contains("extends Application")
             return isApplication
         }

@@ -7,7 +7,7 @@ target("externalGradleProject") {
 }
 
 target("sourceFile") {
-    sourceFile("io.xpipe.Main")
+    sourceFile("io.xpipe.jfx_runner.SampleApp")
 }
 
 target("monkeytester") {
