@@ -54,7 +54,7 @@ apply from: 'source.gradle'
 println("Applying source config $foundSource")
 apply from: foundSource
 
-if (!ext.configuredSource) {
+if (!configuredSource) {
     throw new IllegalStateException("File " + configSource + ".gradle did not add any source")
 }
 

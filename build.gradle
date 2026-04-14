@@ -20,11 +20,21 @@ if (configuredTarget.includeProject()) {
     def task = configuredTarget.getIncludedProjectRunTask()
     if (task != null) {
         run {
+            actions.clear()
             dependsOn(gradle.includedBuild(projectName).task(task))
         }
         clean {
             dependsOn(gradle.includedBuild(projectName).task(":clean"))
         }
+    }
+}
+
+// TODO: Run this at the proper time
+for (def mod in jfxModules.entrySet()) {
+    copy {
+        from "$jfxDir/build/publications/${mod.key}-win.jar"
+        into "$jfxDir/modules/${mod.key}/build/libs/"
+        rename "${mod.key}-win.jar", "${mod.value}.jar"
     }
 }
 
@@ -50,11 +60,9 @@ if (configuredTargetCustomRun == null && !configuredTarget.includeProject() && t
 if (configuredTargetCustomRun == null && configuredTarget.runWithinGradle()) {
     dependencies {
         for (def mod in jfxModules.entrySet()) {
-            implementation ("io.openjfx:${mod.key.replaceAll("\\.", "-")}")
+            implementation ("org.openjfx:${mod.key.replaceAll("\\.", "-")}")
             implementation files("$jfxDir/build/sdk/lib/${mod.key}.jar")
         }
-
-        implementation files(fileTree("$jfxDir/build/libs").files)
     }
 
     application {
@@ -70,7 +78,8 @@ if (configuredTargetCustomRun == null && configuredTarget.runWithinGradle()) {
 
 else if (configuredTargetCustomRun != null) {
     run {
-        doFirst {
+        actions.clear()
+        doLast {
             println("Running custom exec")
             configuredTargetCustomRun(targetDir, jfxDir)
         }
