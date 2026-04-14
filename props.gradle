@@ -97,17 +97,9 @@ def allModules = file("$sourceDir/modules").listFiles().toList().stream()
             s.contains("incubator") ? s.split("\\.", 2)[1] : s.split("\\.").last()
         }))
 
-def args = [
-        "--enable-native-access=ALL-UNNAMED",
-        "--sun-misc-unsafe-memory-access=allow",
-        "-Djavafx.enablePreview=true"
-]
-
 ext {
     activeSource = configSource
     jfxDir = sourceDir
     jfxModules = allModules
     jfxBuildProperties = configuredBuildProperties
-
-    targetJvmArgs = args + configuredTargetJvmArgs
 }

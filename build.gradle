@@ -65,9 +65,15 @@ if (configuredTargetCustomRun == null && configuredTarget.runWithinGradle()) {
         }
     }
 
+    def defaultJvmArgs = [
+            "--enable-native-access=ALL-UNNAMED",
+            "--sun-misc-unsafe-memory-access=allow",
+            "-Djavafx.enablePreview=true"
+    ]
+
     application {
         mainClass = configuredTarget.queryApplicationClass()
-        applicationDefaultJvmArgs = targetJvmArgs
+        applicationDefaultJvmArgs = configuredTargetJvmArgs + defaultJvmArgs
 
         println()
         println("Running target with gradle application plugin")
