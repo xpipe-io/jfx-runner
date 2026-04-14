@@ -4,7 +4,7 @@
  */
 def exec(File dir, boolean fail, String... args) {
     def joined = String.join(" ", args)
-    println("Running $joined")
+    println("Running $joined in $dir")
     def proc = new ProcessBuilder(args).directory(dir).start()
     def stdout = new Thread() {
         @Override
@@ -30,4 +30,25 @@ def exec(File dir, boolean fail, String... args) {
 
 ext {
     exec = this.&exec
+}
+
+def checkoutGit(String repo, String ref) {
+    def uri = URI.create(repo)
+    def name = uri.getPath()
+    def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
+    tempDir.mkdirs()
+    if (inInitialization) {
+        println("Cloning into directory " + tempDir + " ...")
+        if (tempDir.listFiles().size() == 0) {
+            exec(null, true, "git", "clone", repo, tempDir.toString())
+        }
+        exec(tempDir, true, "git", "checkout", ref)
+        exec(tempDir, true, "git", "pull", "origin", ref)
+        exec(tempDir, true, "git", "checkout", ref)
+    }
+    return tempDir
+}
+
+ext {
+    checkoutGit = this.&checkoutGit
 }

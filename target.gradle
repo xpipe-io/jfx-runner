@@ -1,13 +1,21 @@
-target("externalFile") {
+target("sampleApp") {
+    sourceFile("io.xpipe.jfx_runner.SampleApp")
+}
+
+target("sampleMain") {
+    sourceFile("io.xpipe.jfx_runner.SampleMain")
+}
+
+target("sampleExternalFile") {
     externalFile(file("C:\\Projects\\javafx-test\\src\\main\\java\\com\\crschnick\\javafxtest\\Main.java"))
 }
 
-target("externalGradleProject") {
+target("sampleExternalGradleProject") {
     externalGradleProject(file("C:\\Projects\\xpipe\\kickstartfx"), ":app:run")
 }
 
-target("sourceFile") {
-    sourceFile("io.xpipe.jfx_runner.SampleApp")
+target("sampleUrl") {
+    urlFile("https://github.com/andy-goryachev-oracle/Test/blob/main/src/goryachev/bugs/AbstractPrimaryTimer_PoorAnimation_8339606.java")
 }
 
 target("monkeytester") {
@@ -18,8 +26,4 @@ target("monkeytester") {
         exec(targetDir.parentFile, true, os.isWindows() ? "ant.bat" : "ant", "-Djavafx.home=\"$jfxDir/build/sdk\"")
         exec(targetDir.parentFile, true, "java", "-p", "\"$jfxDir/build/sdk/lib\"", "--add-modules", "ALL-MODULE-PATH", "-jar", "$targetDir.parentFile/build/jars/MonkeyTester.jar")
     }
-}
-
-target("url") {
-    urlFile("https://github.com/andy-goryachev-oracle/Test/blob/main/src/goryachev/bugs/AbstractPrimaryTimer_PoorAnimation_8339606.java")
 }
