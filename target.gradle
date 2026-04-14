@@ -10,6 +10,22 @@ target("sampleExternalFile") {
     externalFile(file("C:\\Projects\\javafx-test\\src\\main\\java\\com\\crschnick\\javafxtest\\Main.java"))
 }
 
+target("sampleExternalSourceDirectory") {
+    externalSourceDirectory(file("C:\\Projects\\javafx-test\\src"), "com.crschnick.javafxtest.Main.java")
+}
+
+target("sampleFetchSourceDirectory") {
+    fetchSourceDirectory("src", "goryachev.bugs.AbstractPrimaryTimer_PoorAnimation_8339606") {
+        checkoutGit("https://github.com/andy-goryachev-oracle/Test", "main")
+    }
+}
+
+target("sampleFetchGradleProject") {
+    fetchGradleProject(":app:run") {
+        checkoutGit("https://github.com/xpipe-io/kickstartfx", "master")
+    }
+}
+
 target("sampleExternalGradleProject") {
     externalGradleProject(file("C:\\Projects\\xpipe\\kickstartfx"), ":app:run")
 }

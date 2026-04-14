@@ -34,5 +34,6 @@ includeBuild(jfxDir.toPath().toRealPath().toAbsolutePath().toString()) {
 
 if (activeTarget.includeProject()) {
     def dir = activeTarget.prepareDirectory()
-    includeBuild(dir)
+    // Fixes for windows 8.3 paths, see https://stackoverflow.com/questions/78185995/missing-externalproject-for
+    includeBuild(dir.toPath().toRealPath().toAbsolutePath().toString())
 }

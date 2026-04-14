@@ -109,15 +109,15 @@ def externalFile(File external) {
     }
 }
 
-def externalSourceDirectory(File dir, String mainClass) {
-    if (!dir.isDirectory()) {
-        throw new IllegalArgumentException("Unable to find external directory $dir")
-    }
-
+def fetchSourceDirectory(String srcDir, String mainClass, Closure<File> c) {
     configuredTarget = new JfxTarget() {
 
         @Override
         File prepareDirectory() {
+            def dir = file("${c.call()}/${srcDir != null ? srcDir : ""}")
+            if (!dir.isDirectory()) {
+                throw new IllegalArgumentException("Unable to find directory $dir")
+            }
             return dir
         }
 
@@ -138,22 +138,32 @@ def externalSourceDirectory(File dir, String mainClass) {
 
         @Override
         boolean requiresLauncher() {
-            def sourceText = file("$dir/${path.replaceAll("\\.", "/")}.java").text
+            def sourceFile = file("${c.call()}/${srcDir != null ? srcDir : ""}/${mainClass.replaceAll("\\.", "/")}.java")
+            def sourceText = sourceFile.text
             def isApplication = sourceText.contains("extends Application")
             return isApplication
         }
     }
 }
 
-def externalGradleProject(File dir, String runTask) {
-    if (!dir.isDirectory()) {
-        throw new IllegalArgumentException("Unable to find external directory $dir")
-    }
+def externalSourceDirectory(File dir, String mainClass) {
+    return fetchSourceDirectory(null, mainClass, { -> dir})
+}
 
+def externalGradleProject(File dir, String runTask) {
+    fetchGradleProject(runTask, { -> dir})
+}
+
+def fetchGradleProject(String runTask, Closure<File> c) {
     configuredTarget = new JfxTarget() {
 
         @Override
         File prepareDirectory() {
+            def dir = c.call()
+            if (!dir.isDirectory()) {
+                throw new IllegalArgumentException("Unable to find directory $dir")
+            }
+
             return dir
         }
 
@@ -262,7 +272,9 @@ def target(String name, Closure c) {
 ext {
     sourceFile = this.&sourceFile
     externalFile = this.&externalFile
+    fetchSourceDirectory = this.&fetchSourceDirectory
     externalSourceDirectory = this.&externalSourceDirectory
+    fetchGradleProject = this.&fetchGradleProject
     externalGradleProject = this.&externalGradleProject
     urlFile = this.&urlFile
     jvmArgs = this.&jvmArgs

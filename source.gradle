@@ -1,25 +1,19 @@
+source("jfx") {
+    fetch {
+        checkoutGit("https://github.com/openjdk/jfx/", "master")
+    }
+}
+
 source("sampleJfxLocal") {
     local(file("C:\\Projects\\jfx"))
 
-    buildProperties("COMPILE_WEBKIT=false")
+    buildProperties("COMPILE_WEBKIT=true")
 }
 
-source("jfx") {
-    local {
-        checkoutGit("https://github.com/openjdk/jfx/", "master")
-    }
-
-    buildProperties("COMPILE_WEBKIT=false")
-}
-
-source("jfxPrUrl") {
+source("sampleJfxPrUrl") {
     jfxPrUrl("https://github.com/openjdk/jfx/pull/2145")
 }
 
-source("jfxPrId") {
+source("sampleJfxPrId") {
     jfxPrId(2146)
-}
-
-source("local") {
-    local(file("C:\\Projects\\jfx"))
 }
