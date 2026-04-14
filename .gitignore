@@ -36,3 +36,4 @@ bin/
 ### Custom ###
 
 src/generated
+src/launcher

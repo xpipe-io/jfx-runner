@@ -35,7 +35,7 @@ if (activeTarget.includeProject()) {
 
 tasks.register('fixJfxLibs', DefaultTask) {
     dependsOn(gradle.includedBuild('jfx').task(":sdk"))
-    
+
     doLast {
         // TODO: Run this at the proper time
         for (def mod in jfxModules.entrySet()) {
@@ -54,7 +54,36 @@ compileJava {
 }
 
 if (activeTargetCustomRun == null && !activeTarget.includeProject() && targetDir != null && targetDir.exists()) {
-    println("Applying external source set dir $targetDir")
+    if (activeTarget.requiresLauncher()) {
+        def launcherDir = file("$rootDir/src/launcher/java")
+        launcherDir.mkdirs()
+        def launcherPackage = file("$launcherDir/io/xpipe/jfx_runner/")
+        launcherPackage.mkdirs()
+
+        def appClass = activeTarget.queryApplicationClass()
+        def launcherText = """package io.xpipe.jfx_runner;
+
+import javafx.application.Application;
+import %s;
+
+public class Launcher {
+    public static void main(String[] args) {
+        Application.launch(%s.class);
+    }
+}
+        """.formatted(appClass, appClass.split("\\.").last())
+        def launcherFile = file("$launcherPackage/Launcher.java")
+        launcherFile.text = launcherText
+
+        sourceSets {
+            main {
+                java {
+                    srcDir(launcherDir)
+                }
+            }
+        }
+    }
+
     sourceSets {
         main {
             java {
@@ -89,7 +118,11 @@ if (activeTargetCustomRun == null && activeTarget.runWithinGradle()) {
     ]
 
     application {
-        mainClass = activeTarget.queryApplicationClass()
+        if (activeTarget.requiresLauncher()) {
+            mainClass = "io.xpipe.jfx_runner.Launcher"
+        } else {
+            mainClass = activeTarget.queryApplicationClass()
+        }
         applicationDefaultJvmArgs = activeTargetJvmArgs + defaultJvmArgs
 
         println()

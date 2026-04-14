@@ -10,6 +10,8 @@ interface JfxTarget {
 
     boolean includeProject();
 
+    boolean requiresLauncher();
+
     default String getIncludedProjectRunTask() {
         return null
     }
@@ -58,6 +60,13 @@ def sourceFile(String path) {
         boolean includeProject() {
             return false
         }
+
+        @Override
+        boolean requiresLauncher() {
+            def sourceText = file("$rootDir/src/main/java/${path.replaceAll("\\.", "")}.java").text
+            def isApplication = sourceText.contains("extends Application")
+            return isApplication
+        }
     }
 }
 
@@ -92,6 +101,11 @@ def externalFile(File external) {
         boolean includeProject() {
             return false
         }
+
+        @Override
+        boolean requiresLauncher() {
+            return true
+        }
     }
 }
 
@@ -121,6 +135,13 @@ def externalSourceDirectory(File dir, String mainClass) {
         boolean includeProject() {
             return false
         }
+
+        @Override
+        boolean requiresLauncher() {
+            def sourceText = file("$dir/${path.replaceAll("\\.", "")}.java").text
+            def isApplication = sourceText.contains("extends Application")
+            return isApplication
+        }
     }
 }
 
@@ -149,6 +170,11 @@ def externalGradleProject(File dir, String runTask) {
         @Override
         boolean includeProject() {
             return true
+        }
+
+        @Override
+        boolean requiresLauncher() {
+            return false
         }
 
         @Override
@@ -204,6 +230,11 @@ def urlFile(String url) {
         @Override
         boolean includeProject() {
             return false
+        }
+
+        @Override
+        boolean requiresLauncher() {
+            return true
         }
     }
 }

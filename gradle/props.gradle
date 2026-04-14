@@ -72,6 +72,7 @@ if (inInitialization) {
     println("Target: $configTarget")
     println("JVM args: $activeTargetJvmArgs")
     println("Custom run: ${activeTargetCustomRun != null}")
+    println("Use launcher: ${activeTarget.requiresLauncher()}")
     println("JavaFX dir: $jfxDir")
     println("JavaFX modules: $jfxModules")
     println("JavaFX properties: $jfxBuildProperties")
