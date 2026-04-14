@@ -30,7 +30,7 @@ includeBuild(jfxDir.toPath().toRealPath().toAbsolutePath().toString()) {
     }
 }
 
-if (configuredTarget.includeProject()) {
-    def dir = configuredTarget.prepareDirectory()
+if (activeTarget.includeProject()) {
+    def dir = activeTarget.prepareDirectory()
     includeBuild(dir)
 }

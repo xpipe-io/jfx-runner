@@ -17,6 +17,9 @@ interface JfxTarget {
 
 ext {
     availableTargets = new HashMap<String, JfxTarget>()
+    availableTargetsJvmArgs = new HashMap<String, List<String>>()
+    availableTargetsCustomRun = new HashMap<String, Closure>()
+
     configuredTarget = null
     configuredTargetJvmArgs = []
     configuredTargetCustomRun = null
@@ -213,7 +216,14 @@ def jvmArgs(String... props) {
 
 def target(String name, Closure c) {
     c.run()
+
     availableTargets.put(name, configuredTarget)
+    availableTargetsJvmArgs.put(name, configuredTargetJvmArgs)
+    availableTargetsCustomRun.put(name, configuredTargetCustomRun)
+
+    configuredTarget = null
+    configuredTargetJvmArgs = []
+    configuredTargetCustomRun = null
 }
 
 ext {

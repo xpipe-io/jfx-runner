@@ -23,8 +23,6 @@ if (!foundSource) {
     throw new IllegalStateException("Source " + configSource + " not defined")
 }
 
-println("Applying source $configSource")
-
 def sourceDir = foundSource.queryLocation()
 if (!sourceDir) {
     throw new IllegalStateException("Source directory query failed")
@@ -49,8 +47,6 @@ if (!foundTarget) {
     throw new IllegalStateException("Target " + configTarget + " not defined")
 }
 
-println("Applying target $configTarget")
-
 def allModules = file("$sourceDir/modules").listFiles().toList().stream()
         .map {f -> f.name}
         .filter {s -> !s.endsWith("swt")}
@@ -59,8 +55,23 @@ def allModules = file("$sourceDir/modules").listFiles().toList().stream()
         }))
 
 ext {
-    activeSource = configSource
+    activeSource = foundSource
+    activeTarget = foundTarget
+    activeTargetJvmArgs = availableTargetsJvmArgs.get(configTarget)
+    activeTargetCustomRun = availableTargetsCustomRun.get(configTarget)
+
     jfxDir = sourceDir
     jfxModules = allModules
     jfxBuildProperties = configuredBuildProperties
 }
+
+println()
+println("Detected jfx-runner configuration:")
+println("Source: $configSource")
+println("Target: $configTarget")
+println("JVM args: $activeTargetJvmArgs")
+println("Custom run: ${activeTargetCustomRun != null}")
+println("JavaFX dir: $jfxDir")
+println("JavaFX modules: $jfxModules")
+println("JavaFX properties: $jfxBuildProperties")
+println()

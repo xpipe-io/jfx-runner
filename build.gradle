@@ -13,11 +13,11 @@ clean {
     dependsOn(gradle.includedBuild('jfx').task(":clean"))
 }
 
-def targetDir = configuredTarget.prepareDirectory()
+def targetDir = activeTarget.prepareDirectory()
 
-if (configuredTarget.includeProject()) {
+if (activeTarget.includeProject()) {
     def projectName = targetDir.name
-    def task = configuredTarget.getIncludedProjectRunTask()
+    def task = activeTarget.getIncludedProjectRunTask()
     if (task != null) {
         run {
             actions.clear()
@@ -38,7 +38,7 @@ for (def mod in jfxModules.entrySet()) {
     }
 }
 
-if (configuredTargetCustomRun == null && !configuredTarget.includeProject() && targetDir != null && targetDir.exists()) {
+if (activeTargetCustomRun == null && !activeTarget.includeProject() && targetDir != null && targetDir.exists()) {
     println("Applying external source set dir $targetDir")
     sourceSets {
         main {
@@ -57,7 +57,7 @@ if (configuredTargetCustomRun == null && !configuredTarget.includeProject() && t
     }
 }
 
-if (configuredTargetCustomRun == null && configuredTarget.runWithinGradle()) {
+if (activeTargetCustomRun == null && activeTarget.runWithinGradle()) {
     dependencies {
         for (def mod in jfxModules.entrySet()) {
             implementation ("org.openjfx:${mod.key.replaceAll("\\.", "-")}")
@@ -72,8 +72,8 @@ if (configuredTargetCustomRun == null && configuredTarget.runWithinGradle()) {
     ]
 
     application {
-        mainClass = configuredTarget.queryApplicationClass()
-        applicationDefaultJvmArgs = configuredTargetJvmArgs + defaultJvmArgs
+        mainClass = activeTarget.queryApplicationClass()
+        applicationDefaultJvmArgs = activeTargetJvmArgs + defaultJvmArgs
 
         println()
         println("Running target with gradle application plugin")
@@ -82,12 +82,12 @@ if (configuredTargetCustomRun == null && configuredTarget.runWithinGradle()) {
     }
 }
 
-else if (configuredTargetCustomRun != null) {
+else if (activeTargetCustomRun != null) {
     run {
         actions.clear()
         doLast {
             println("Running custom exec")
-            configuredTargetCustomRun(targetDir, jfxDir)
+            activeTargetCustomRun(targetDir, jfxDir)
         }
     }
 }

@@ -81,7 +81,10 @@ def buildProperties(String... props) {
 
 def source(String name, Closure c) {
     c.run()
+
     availableSources.put(name, configuredSource)
+
+    configuredSource = null
 }
 
 ext {
