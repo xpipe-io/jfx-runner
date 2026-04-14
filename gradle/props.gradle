@@ -62,16 +62,18 @@ ext {
 
     jfxDir = sourceDir
     jfxModules = allModules
-    jfxBuildProperties = configuredBuildProperties
+    jfxBuildProperties = availableSourcesBuildProperties.get(configSource)
 }
 
-println()
-println("Detected jfx-runner configuration:")
-println("Source: $configSource")
-println("Target: $configTarget")
-println("JVM args: $activeTargetJvmArgs")
-println("Custom run: ${activeTargetCustomRun != null}")
-println("JavaFX dir: $jfxDir")
-println("JavaFX modules: $jfxModules")
-println("JavaFX properties: $jfxBuildProperties")
-println()
+if (inInitialization) {
+    println()
+    println("Detected jfx-runner configuration:")
+    println("Source: $configSource")
+    println("Target: $configTarget")
+    println("JVM args: $activeTargetJvmArgs")
+    println("Custom run: ${activeTargetCustomRun != null}")
+    println("JavaFX dir: $jfxDir")
+    println("JavaFX modules: $jfxModules")
+    println("JavaFX properties: $jfxBuildProperties")
+    println()
+}

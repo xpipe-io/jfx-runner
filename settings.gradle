@@ -2,6 +2,10 @@ import java.util.stream.Collectors
 
 rootProject.name = 'jfx-runner'
 
+ext {
+    inInitialization = true
+}
+
 apply from: "$rootDir/gradle/props.gradle"
 
 def propertiesFile = file("$jfxDir/gradle.properties")
@@ -18,8 +22,6 @@ if (!jfxBuildProperties.isEmpty()) {
 } else if (autogenIndex != -1) {
     propertiesFile.text = propertiesText
 }
-
-println("Including JavaFX project from " + jfxDir)
 
 // Fixes for windows 8.3 paths, see https://stackoverflow.com/questions/78185995/missing-externalproject-for
 includeBuild(jfxDir.toPath().toRealPath().toAbsolutePath().toString()) {

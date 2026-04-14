@@ -7,6 +7,7 @@ interface JfxSource {
 
 ext {
     availableSources = new HashMap<String, JfxSource>()
+    availableSourcesBuildProperties = new HashMap<String, List<String>>()
     configuredSource = null;
     configuredBuildProperties = []
 }
@@ -33,13 +34,15 @@ def git(String repo, String ref) {
             def uri = URI.create(repo)
             def name = uri.getPath()
             def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
-            println("Cloning source into directory " + tempDir + " ...")
             tempDir.mkdirs()
-            if (tempDir.listFiles().size() == 0) {
-                exec(null, true, "git", "clone", repo, tempDir.toString())
+            if (inInitialization) {
+                println("Cloning source into directory " + tempDir + " ...")
+                if (tempDir.listFiles().size() == 0) {
+                    exec(null, true, "git", "clone", repo, tempDir.toString())
+                }
+                exec(tempDir, true, "git", "pull")
+                exec(tempDir, true, "git", "checkout", ref)
             }
-            exec(tempDir, true, "git", "pull")
-            exec(tempDir, true, "git", "checkout", ref)
             return tempDir
         }
     }
@@ -63,13 +66,15 @@ def prId(int id) {
             def uri = URI.create("https://github.com/openjdk/jfx")
             def name = uri.getPath()
             def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
-            println("Cloning source into directory " + tempDir + " ...")
             tempDir.mkdirs()
-            if (tempDir.listFiles().size() == 0) {
-                exec(null, true, "git", "clone", uri, tempDir.toString())
+            if (inInitialization) {
+                println("Cloning source into directory " + tempDir + " ...")
+                if (tempDir.listFiles().size() == 0) {
+                    exec(null, true, "git", "clone", uri, tempDir.toString())
+                }
+                exec(tempDir, false, "git", "fetch", "origin", "pull/" + id + "/head:" + id)
+                exec(tempDir, true, "git", "checkout", "" + id)
             }
-            exec(tempDir, false, "git", "fetch", "origin", "pull/" + id + "/head:" + id)
-            exec(tempDir, true, "git", "checkout", "" + id)
             return tempDir
         }
     }
@@ -83,8 +88,10 @@ def source(String name, Closure c) {
     c.run()
 
     availableSources.put(name, configuredSource)
+    availableSourcesBuildProperties.put(name, configuredBuildProperties)
 
     configuredSource = null
+    configuredBuildProperties = []
 }
 
 ext {

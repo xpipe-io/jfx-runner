@@ -3,6 +3,10 @@ plugins {
     id 'application'
 }
 
+ext {
+    inInitialization = false
+}
+
 apply from: "$rootDir/gradle/props.gradle"
 
 repositories {

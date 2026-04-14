@@ -1,4 +1,7 @@
-
+/**
+ * This method is needed as the standard gradle ExecOperations service requires a project,
+ * which is not available during the initialization phase of the settings file
+ */
 def exec(File dir, boolean fail, String... args) {
     def joined = String.join(" ", args)
     println("Running $joined")

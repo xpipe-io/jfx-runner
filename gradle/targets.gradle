@@ -179,8 +179,10 @@ def urlFile(String url) {
 
             def sourceFile = file("$rootDir/src/generated/java/$pkgDirs/${name}.java")
             sourceFile.parentFile.mkdirs()
-            println("Download file from $url to to $sourceFile")
-            parsedUrl.withInputStream{ i -> sourceFile.withOutputStream{ it << i }}
+            if (inInitialization) {
+                println("Download file from $url to to $sourceFile")
+                parsedUrl.withInputStream { i -> sourceFile.withOutputStream { it << i } }
+            }
             return file("$rootDir/src/generated/java")
         }
 
