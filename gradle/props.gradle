@@ -1,0 +1,66 @@
+import java.util.stream.Collectors
+
+
+def configProps = new Properties()
+try (def reader = file("$rootDir/config.properties").newReader()) {
+    configProps.load(reader)
+}
+
+def configSource = (String) configProps.get("source")
+if (!configSource) {
+    throw new IllegalStateException("No source specified in config.properties")
+}
+
+apply from: "$rootDir/gradle/sources.gradle"
+apply from: "$rootDir/source.gradle"
+
+if (availableSources.isEmpty()) {
+    throw new IllegalStateException("No sources configured")
+}
+
+def foundSource = availableSources.get(configSource)
+if (!foundSource) {
+    throw new IllegalStateException("Source " + configSource + " not defined")
+}
+
+println("Applying source $configSource")
+
+def sourceDir = foundSource.queryLocation()
+if (!sourceDir) {
+    throw new IllegalStateException("Source directory query failed")
+}
+
+
+
+def configTarget = (String) configProps.get("target")
+if (!configTarget) {
+    throw new IllegalStateException("No target specified in config.properties")
+}
+
+apply from: "$rootDir/gradle/targets.gradle"
+apply from: "$rootDir/target.gradle"
+
+if (availableTargets.isEmpty()) {
+    throw new IllegalStateException("No targets configured")
+}
+
+def foundTarget = availableTargets.get(configTarget)
+if (!foundTarget) {
+    throw new IllegalStateException("Target " + configTarget + " not defined")
+}
+
+println("Applying target $configTarget")
+
+def allModules = file("$sourceDir/modules").listFiles().toList().stream()
+        .map {f -> f.name}
+        .filter {s -> !s.endsWith("swt")}
+        .collect(Collectors.<String, String,String>toMap(s -> s, s -> {
+            s.contains("incubator") ? s.split("\\.", 2)[1] : s.split("\\.").last()
+        }))
+
+ext {
+    activeSource = configSource
+    jfxDir = sourceDir
+    jfxModules = allModules
+    jfxBuildProperties = configuredBuildProperties
+}

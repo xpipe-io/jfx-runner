@@ -2,7 +2,7 @@ import java.util.stream.Collectors
 
 rootProject.name = 'jfx-runner'
 
-apply from: "props.gradle"
+apply from: "$rootDir/gradle/props.gradle"
 
 def propertiesFile = file("$jfxDir/gradle.properties")
 def propertiesText = propertiesFile.exists() ? propertiesFile.text : ""

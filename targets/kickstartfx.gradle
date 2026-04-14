@@ -1,5 +1,0 @@
-target {
-    git("https://github.com/xpipe-io/kickstartfx", "master")
-
-    gradleTask("app:run")
-}

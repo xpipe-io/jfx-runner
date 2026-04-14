@@ -1,9 +1,0 @@
-target {
-    externalSourceDirectory(file("C:\\Projects\\MonkeyTest\\src"), "com.oracle.tools.fx.monkey.MonkeyTesterApp")
-
-    customExec {File targetDir, File jfxDir ->
-        OperatingSystem os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem;
-        exec(targetDir.parentFile, true, os.isWindows() ? "ant.bat" : "ant", "-Djavafx.home=\"$jfxDir/build/sdk\"")
-        exec(targetDir.parentFile, true, "java", "-p", "\"$jfxDir/build/sdk/lib\"", "--add-modules", "ALL-MODULE-PATH", "-jar", "$targetDir.parentFile/build/jars/MonkeyTester.jar")
-    }
-}

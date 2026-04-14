@@ -1,3 +1,0 @@
-target {
-    externalFile(file("C:\\Projects\\javafx-test\\src\\main\\java\\com\\crschnick\\javafxtest\\Main.java"))
-}

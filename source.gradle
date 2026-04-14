@@ -1,98 +1,17 @@
-interface JfxSource {
+source("jfx") {
+    git("https://github.com/openjdk/jfx/", "master")
 
-    File queryLocation();
+    buildProperties("COMPILE_WEBKIT=false")
 }
 
-ext {
-    configuredSource = null;
-    configuredBuildProperties = []
+source("prUrl") {
+    prUrl("https://github.com/openjdk/jfx/pull/2145")
 }
 
-def local(File dir) {
-    if (!dir.isDirectory()) {
-        throw new IllegalArgumentException("Directory " + dir + " does not exist")
-    }
-
-    configuredSource = new JfxSource() {
-
-        @Override
-        File queryLocation() {
-            return dir
-        }
-    }
+source("prId") {
+    prId(2146)
 }
 
-def git(String repo, String ref) {
-    if (configuredSource) {
-        return
-    }
-
-    configuredSource = new JfxSource() {
-
-        @Override
-        File queryLocation() {
-            def uri = URI.create(repo)
-            def name = uri.getPath()
-            def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
-            println("Cloning source into directory " + tempDir + " ...")
-            tempDir.mkdirs()
-            if (tempDir.listFiles().size() == 0) {
-                exec(null, true, "git", "clone", repo, tempDir.toString())
-            }
-            exec(tempDir, true, "git", "pull")
-            exec(tempDir, true, "git", "checkout", ref)
-            return tempDir
-        }
-    }
-}
-
-def prUrl(String url) {
-    def prefix = "https://github.com/openjdk/jfx/pull/"
-    if (!url.startsWith(prefix)) {
-        throw new IllegalArgumentException("Invalid PR URL format")
-    }
-
-    def id = Integer.parseInt(url.substring(prefix.length()))
-    prId(id)
-}
-
-def prId(int id) {
-    if (configuredSource) {
-        return
-    }
-
-    configuredSource = new JfxSource() {
-
-        @Override
-        File queryLocation() {
-            def uri = URI.create("https://github.com/openjdk/jfx")
-            def name = uri.getPath()
-            def tempDir = file("${System.getProperty("java.io.tmpdir")}/jfx-runner/$name")
-            println("Cloning source into directory " + tempDir + " ...")
-            tempDir.mkdirs()
-            if (tempDir.listFiles().size() == 0) {
-                exec(null, true, "git", "clone", uri, tempDir.toString())
-            }
-            exec(tempDir, false, "git", "fetch", "origin", "pull/" + id + "/head:" + id)
-            exec(tempDir, true, "git", "checkout", "" + id)
-            return tempDir
-        }
-    }
-}
-
-def buildProperties(String... props) {
-    configuredBuildProperties += props.toList()
-}
-
-def source(Closure c) {
-    c.run()
-}
-
-ext {
-    local = this.&local
-    git = this.&git
-    prUrl = this.&prUrl
-    prId = this.&prId
-    buildProperties = this.&buildProperties
-    source = this.&source
+source("local") {
+    local(file("C:\\Projects\\jfx"))
 }

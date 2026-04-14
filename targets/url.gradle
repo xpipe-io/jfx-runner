@@ -1,3 +1,0 @@
-target {
-    urlFile("https://github.com/andy-goryachev-oracle/Test/blob/main/src/goryachev/bugs/AbstractPrimaryTimer_PoorAnimation_8339606.java")
-}

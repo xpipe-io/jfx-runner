@@ -1,226 +1,25 @@
-import java.util.function.Consumer
+target("externalFile") {
+    externalFile(file("C:\\Projects\\javafx-test\\src\\main\\java\\com\\crschnick\\javafxtest\\Main.java"))
+}
 
-interface JfxTarget {
+target("externalGradleProject") {
+    externalGradleProject(file("C:\\Projects\\xpipe\\kickstartfx"), ":app:run")
+}
 
-    File prepareDirectory();
+target("sourceFile") {
+    sourceFile("io.xpipe.Main")
+}
 
-    String queryApplicationClass();
+target("monkeytester") {
+    externalSourceDirectory(file("C:\\Projects\\MonkeyTest\\src"), "com.oracle.tools.fx.monkey.MonkeyTesterApp")
 
-    boolean runWithinGradle();
-
-    boolean includeProject();
-
-    default String getIncludedProjectRunTask() {
-        return null
+    customExec {File targetDir, File jfxDir ->
+        OperatingSystem os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem;
+        exec(targetDir.parentFile, true, os.isWindows() ? "ant.bat" : "ant", "-Djavafx.home=\"$jfxDir/build/sdk\"")
+        exec(targetDir.parentFile, true, "java", "-p", "\"$jfxDir/build/sdk/lib\"", "--add-modules", "ALL-MODULE-PATH", "-jar", "$targetDir.parentFile/build/jars/MonkeyTester.jar")
     }
 }
 
-ext {
-    configuredTarget = null
-    configuredTargetJvmArgs = []
-    configuredTargetCustomRun = null
-}
-
-def getPackage(String content) {
-    def pkg = null
-    for (final def line in content.lines().toList()) {
-        if (line.startsWith("package")) {
-            pkg = line.split(" ")[1].trim().split(";")[0]
-            break
-        }
-    }
-    return pkg
-}
-
-def sourceFile(String path) {
-    configuredTarget = new JfxTarget() {
-
-        @Override
-        File prepareDirectory() {
-            return file("$rootDir/src/main/java")
-        }
-
-        @Override
-        String queryApplicationClass() {
-            return path
-        }
-
-        @Override
-        boolean runWithinGradle() {
-            return true;
-        }
-
-        @Override
-        boolean includeProject() {
-            return false
-        }
-    }
-}
-
-def externalFile(File external) {
-    if (!external.isFile()) {
-        throw new IllegalArgumentException("Unable to find external file $external")
-    }
-
-    configuredTarget = new JfxTarget() {
-
-        @Override
-        File prepareDirectory() {
-            def content = external.text
-            def pkg = getPackage(content)
-            def base = external.toString().substring(0, external.toString().length() - (pkg.length() + 1 + external.name.length()))
-            return file(base)
-        }
-
-        @Override
-        String queryApplicationClass() {
-            def content = external.text
-            def pkg = getPackage(content)
-            return pkg + "." + external.name.take(external.name.lastIndexOf('.'))
-        }
-
-        @Override
-        boolean runWithinGradle() {
-            return true;
-        }
-
-        @Override
-        boolean includeProject() {
-            return false
-        }
-    }
-}
-
-def externalSourceDirectory(File dir, String mainClass) {
-    if (!dir.isDirectory()) {
-        throw new IllegalArgumentException("Unable to find external directory $dir")
-    }
-
-    configuredTarget = new JfxTarget() {
-
-        @Override
-        File prepareDirectory() {
-            return dir
-        }
-
-        @Override
-        String queryApplicationClass() {
-            return mainClass
-        }
-
-        @Override
-        boolean runWithinGradle() {
-            return true;
-        }
-
-        @Override
-        boolean includeProject() {
-            return false
-        }
-    }
-}
-
-def externalGradleProject(File dir, String runTask) {
-    if (!dir.isDirectory()) {
-        throw new IllegalArgumentException("Unable to find external directory $dir")
-    }
-
-    configuredTarget = new JfxTarget() {
-
-        @Override
-        File prepareDirectory() {
-            return dir
-        }
-
-        @Override
-        String queryApplicationClass() {
-            return null
-        }
-
-        @Override
-        boolean runWithinGradle() {
-            return false
-        }
-
-        @Override
-        boolean includeProject() {
-            return true
-        }
-
-        @Override
-        String getIncludedProjectRunTask() {
-            return runTask
-        }
-    }
-}
-
-def urlFile(String url) {
-    if (url.startsWith("https://github.com/")) {
-        url = url.replace("https://github.com", "https://raw.githubusercontent.com")
-        url = url.replace("/blob/", "/refs/heads/")
-    }
-
-    def parsedUrl = URI.create(url).toURL()
-    def name = parsedUrl.getPath().split("/").last().split("\\.").first()
-    configuredTarget = new JfxTarget() {
-
-        @Override
-        File prepareDirectory() {
-            def tempFile = file("${System.getProperty("java.io.tmpdir")}/$name")
-            parsedUrl.withInputStream{ i -> tempFile.withOutputStream{ it << i }}
-            def tempContent = tempFile.text
-
-            def pkg = getPackage(tempContent)
-            def pkgDirs = pkg != null ? pkg.replaceAll("\\.", "/") : ""
-
-            def sourceFile = file("$rootDir/src/generated/java/$pkgDirs/${name}.java")
-            sourceFile.parentFile.mkdirs()
-            println("Download file from $url to to $sourceFile")
-            parsedUrl.withInputStream{ i -> sourceFile.withOutputStream{ it << i }}
-            return file("$rootDir/src/generated/java")
-        }
-
-        @Override
-        String queryApplicationClass() {
-            def tempFile = file("${System.getProperty("java.io.tmpdir")}/$name")
-            parsedUrl.withInputStream{ i -> tempFile.withOutputStream{ it << i }}
-            def tempContent = tempFile.text
-
-            def pkg = getPackage(tempContent)
-            return pkg + "." + name
-        }
-
-        @Override
-        boolean runWithinGradle() {
-            return true;
-        }
-
-        @Override
-        boolean includeProject() {
-            return false
-        }
-    }
-}
-
-def customExec(Closure c) {
-    configuredTargetCustomRun = c
-}
-
-def jvmArgs(String... props) {
-    configuredTargetJvmArgs += props.toList()
-}
-
-def target(Closure c) {
-    c.run()
-}
-
-ext {
-    sourceFile = this.&sourceFile
-    externalFile = this.&externalFile
-    externalSourceDirectory = this.&externalSourceDirectory
-    externalGradleProject = this.&externalGradleProject
-    urlFile = this.&urlFile
-    jvmArgs = this.&jvmArgs
-    customExec = this.&customExec
-    target = this.&target
+target("url") {
+    urlFile("https://github.com/andy-goryachev-oracle/Test/blob/main/src/goryachev/bugs/AbstractPrimaryTimer_PoorAnimation_8339606.java")
 }

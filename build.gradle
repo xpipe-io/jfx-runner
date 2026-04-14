@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-apply from: "props.gradle"
+apply from: "$rootDir/gradle/props.gradle"
 
 repositories {
     mavenCentral()

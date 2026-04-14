@@ -1,5 +1,0 @@
-source {
-    git("https://github.com/openjdk/jfx/", "master")
-
-    buildProperties("COMPILE_WEBKIT=false")
-}

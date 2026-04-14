@@ -1,3 +1,0 @@
-source {
-    prUrl("https://github.com/openjdk/jfx/pull/2145")
-}
