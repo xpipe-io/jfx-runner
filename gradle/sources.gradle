@@ -70,7 +70,7 @@ def prId(int id) {
             if (inInitialization) {
                 println("Cloning source into directory " + tempDir + " ...")
                 if (tempDir.listFiles().size() == 0) {
-                    exec(null, true, "git", "clone", uri, tempDir.toString())
+                    exec(null, true, "git", "clone", uri.toString(), tempDir.toString())
                 }
                 exec(tempDir, false, "git", "fetch", "origin", "pull/" + id + "/head:" + id)
                 exec(tempDir, true, "git", "checkout", "" + id)

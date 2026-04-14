@@ -33,13 +33,24 @@ if (activeTarget.includeProject()) {
     }
 }
 
-// TODO: Run this at the proper time
-for (def mod in jfxModules.entrySet()) {
-    copy {
-        from "$jfxDir/build/publications/${mod.key}-win.jar"
-        into "$jfxDir/modules/${mod.key}/build/libs/"
-        rename "${mod.key}-win.jar", "${mod.value}.jar"
+tasks.register('fixJfxLibs', DefaultTask) {
+    dependsOn(gradle.includedBuild('jfx').task(":sdk"))
+    
+    doLast {
+        // TODO: Run this at the proper time
+        for (def mod in jfxModules.entrySet()) {
+            copy {
+                from "$jfxDir/build/publications/${mod.key}-win.jar"
+                into "$jfxDir/modules/${mod.key}/build/libs/"
+                rename "${mod.key}-win.jar", "${mod.value}.jar"
+            }
+        }
     }
+}
+
+compileJava {
+    dependsOn(gradle.includedBuild('jfx').task(":sdk"))
+    dependsOn(tasks.fixJfxLibs)
 }
 
 if (activeTargetCustomRun == null && !activeTarget.includeProject() && targetDir != null && targetDir.exists()) {
@@ -67,6 +78,8 @@ if (activeTargetCustomRun == null && activeTarget.runWithinGradle()) {
             implementation ("org.openjfx:${mod.key.replaceAll("\\.", "-")}")
             implementation files("$jfxDir/build/sdk/lib/${mod.key}.jar")
         }
+
+        implementation files(fileTree("$jfxDir/build/libs").files)
     }
 
     def defaultJvmArgs = [
