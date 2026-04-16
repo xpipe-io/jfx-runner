@@ -1,19 +1,37 @@
+/**
+ * Clone the jfx master branch into a temp dir
+ */
 source("jfx") {
     fetch {
+        /**
+         * You can change the repo and git ref
+         */
         checkoutGit("https://github.com/openjdk/jfx/", "master")
     }
 }
 
+/**
+ * If you have a local clone, you can use this one instead
+ */
 source("sampleJfxLocal") {
     local(file("C:\\Projects\\jfx"))
 
+    /**
+     * You can set build properties for the JavaFX build
+     */
     buildProperties("COMPILE_WEBKIT=true")
 }
 
+/**
+ * This helper method allows you to directly clone a specific pull request branch
+ */
 source("sampleJfxPrUrl") {
     jfxPrUrl("https://github.com/openjdk/jfx/pull/2145")
 }
 
+/**
+ * Alternatively, you can just specify the PR ID
+ */
 source("sampleJfxPrId") {
     jfxPrId(2146)
 }

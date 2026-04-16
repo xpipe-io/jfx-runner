@@ -35,14 +35,31 @@ if (activeTarget.includeProject()) {
     }
 }
 
+// JavaFX does not place the generated jars at the default location in build/libs
+// This throws off gradle, so we have to fix it
+// TODO: Run this at the proper time
 tasks.register('fixJfxLibs', DefaultTask) {
     dependsOn(gradle.includedBuild('jfx').task(":sdk"))
 
     doLast {
-        // TODO: Run this at the proper time
+        def os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem
+        def javafxPlatform = null
+        if (os.isWindows()) {
+            javafxPlatform = 'win'
+        } else if (os.isLinux()) {
+            javafxPlatform = 'linux'
+        } else if (os.isMacOsX()) {
+            javafxPlatform = 'mac'
+        }
+
+        def platformClassifier = javafxPlatform
+        if (System.getProperty ("os.arch") == 'aarch64') {
+            platformClassifier += '-aarch64'
+        }
+
         for (def mod in jfxModules.entrySet()) {
             copy {
-                from "$jfxDir/build/publications/${mod.key}-win.jar"
+                from "$jfxDir/build/publications/${mod.key}-${platformClassifier}.jar"
                 into "$jfxDir/modules/${mod.key}/build/libs/"
                 rename "${mod.key}-win.jar", "${mod.value}.jar"
             }
@@ -56,6 +73,8 @@ compileJava {
 }
 
 if (activeTargetCustomRun == null && !activeTarget.includeProject() && targetDir != null && targetDir.exists()) {
+    // Create custom launcher class to prevent this issue:
+    // https://stackoverflow.com/questions/78501081/how-do-i-fix-error-javafx-runtime-components-are-missing-and-are-required-to-r
     if (activeTarget.requiresLauncher()) {
         def launcherDir = file("$rootDir/src/launcher/java")
         launcherDir.mkdirs()
@@ -118,13 +137,13 @@ public class Launcher {
 if (activeTargetCustomRun == null && activeTarget.runWithinGradle()) {
     dependencies {
         for (def mod in jfxModules.entrySet()) {
+            // We need both to make IDEs and compilation work
             implementation ("org.openjfx:${mod.key.replaceAll("\\.", "-")}")
             implementation files("$jfxDir/build/sdk/lib/${mod.key}.jar")
         }
-
-        implementation files(fileTree("$jfxDir/build/libs").files)
     }
 
+    // These options are needed for any JavaFX program
     def defaultJvmArgs = [
             "--enable-native-access=ALL-UNNAMED",
             "--sun-misc-unsafe-memory-access=allow",
