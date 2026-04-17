@@ -40,10 +40,10 @@ def checkoutGit(String repo, String ref) {
     if (inInitialization) {
         println("Cloning into directory " + tempDir + " ...")
         if (tempDir.listFiles().size() == 0) {
-            exec(null, true, "git", "clone", repo, tempDir.toString())
+            exec(null, true, "git", "clone", "--recurse-submodules", "--depth=10", repo, tempDir.toString())
         }
         exec(tempDir, true, "git", "checkout", ref)
-        exec(tempDir, true, "git", "pull", "origin", ref)
+        exec(tempDir, true, "git", "pull", "--recurse-submodules", "--depth=10", "origin", ref)
         exec(tempDir, true, "git", "checkout", ref)
     }
     return tempDir

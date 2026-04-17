@@ -97,7 +97,7 @@ target("monkeytesterGit") {
     }
 }
 
-target("jabref") {
+target("jabrefGit") {
     fetchGradleProject(":run") {
         checkoutGit("https://github.com/JabRef/jabref", "main")
     }
