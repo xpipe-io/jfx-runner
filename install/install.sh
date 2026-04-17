@@ -19,8 +19,8 @@ install() {
     if [ -f "/etc/debian_version" ]; then
       cat "$dir/debian_packages.txt" | while read line
       do
-        echo "+ sudo apt install $line"
-        sudo apt install $line
+        echo "+ sudo apt install -y $line"
+        sudo apt install -y $line
       done
     fi
     ;;
