@@ -47,6 +47,7 @@ if (!foundTarget) {
 }
 
 def allModules = file("$sourceDir/modules").listFiles().toList().stream()
+        .filter {f -> f.isDirectory()}
         .map {f -> f.name}
         .filter {s -> !s.endsWith("swt")}
         .collect(Collectors.<String, String,String>toMap(s -> s, s -> {

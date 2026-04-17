@@ -46,21 +46,17 @@ for (def mod in jfxModules.entrySet()) {
         javafxPlatform = 'mac'
     }
 
-    def platformClassifier = javafxPlatform
-    if (System.getProperty ("os.arch") == 'aarch64') {
-        platformClassifier += '-aarch64'
-    }
-
-    def copyTask = tasks.register("fix${mod.getValue().replaceAll("\\.", "")}Libs", org.gradle.api.tasks.Copy) {
+    def modCopy = mod
+    def copyTask = tasks.register("fix${modCopy.getValue().replaceAll("\\.", "")}Libs", org.gradle.api.tasks.Copy) {
         dependsOn(gradle.includedBuild("jfx").task(":sdk"))
 
-        from "$jfxDir/build/publications/${mod.key}-${platformClassifier}.jar"
-        into "$jfxDir/modules/${mod.key}/build/libs/"
-        rename "${mod.key}-win.jar", "${mod.value}.jar"
+        from "$jfxDir/build/publications/${modCopy.key}-${javafxPlatform}.jar"
+        into "$jfxDir/modules/${modCopy.key}/build/libs/"
+        rename "${modCopy.key}-${javafxPlatform}.jar", "${modCopy.value}.jar"
     }
 
     compileJava {
-        dependsOn(copyTask)
+        finalizedBy(copyTask)
     }
 }
 
