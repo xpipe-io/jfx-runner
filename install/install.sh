@@ -21,7 +21,6 @@ install() {
     fi
     ;;
   Darwin)
-    sudo installer -verboseR -pkg "$file" -target /
     ;;
   *)
     exit 1
