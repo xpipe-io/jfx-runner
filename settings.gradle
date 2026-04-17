@@ -36,7 +36,7 @@ includeBuild(jfxDir.toPath().toRealPath().toAbsolutePath().toString()) {
         // Make gradle replace all declared JavaFX dependencies with locally built ones
         // See https://docs.gradle.org/current/userguide/composite_builds.html
         for (def mod in jfxModules.entrySet()) {
-            substitute module("org.openjfx:${mod.key.replaceAll("\\.", "-")}") using project(":$mod.value")
+            substitute module("org.openjfx:${mod.key.replaceAll("\\.", "-")}") using project(":$mod.value") withoutArtifactSelectors()
         }
     }
 }

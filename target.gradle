@@ -103,3 +103,8 @@ target("jabrefGit") {
     }
 }
 
+target("xpipeGit") {
+    fetchGradleProject(":app:run") {
+        checkoutGit("https://github.com/xpipe-io/xpipe", "master")
+    }
+}
