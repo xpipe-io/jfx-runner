@@ -57,6 +57,7 @@ def allModules = file("$sourceDir/modules").listFiles().toList().stream()
 ext {
     activeSource = foundSource
     activeTarget = foundTarget
+    activeTargetDir = activeTarget.prepareDirectory()
     activeTargetJvmArgs = availableTargetsJvmArgs.get(configTarget)
     activeTargetCustomRun = availableTargetsCustomRun.get(configTarget)
 
@@ -70,6 +71,7 @@ if (inInitialization) {
     println("Detected jfx-runner configuration:")
     println("Source: $configSource")
     println("Target: $configTarget")
+    println("Target dir: $activeTargetDir")
     println("JVM args: $activeTargetJvmArgs")
     println("Custom run: ${activeTargetCustomRun != null}")
     println("Use launcher: ${activeTarget.requiresLauncher()}")

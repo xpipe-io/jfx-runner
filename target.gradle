@@ -16,7 +16,7 @@ target("sampleMain") {
  * Launches a source file (either Application or main method) that is not located in this project src
  */
 target("sampleExternalFile") {
-    externalFile(file("C:\\Projects\\javafx-test\\src\\main\\java\\com\\crschnick\\javafxtest\\Main.java"))
+    externalFile(file("C:\\Projects\\javafx-test\\src\\main\\java\\com\\crschnick\\javafxtest\\ContextMenuBug.java"))
 }
 
 /**
@@ -24,7 +24,7 @@ target("sampleExternalFile") {
  * This allows for imports to resolve in case the main class references other classes in the src dir
  */
 target("sampleExternalSourceDirectory") {
-    externalSourceDirectory(file("C:\\Projects\\javafx-test\\src"), "com.crschnick.javafxtest.Main.java")
+    externalSourceDirectory(file("C:\\Projects\\javafx-test\\src\\main\\java"), "com.crschnick.javafxtest.ContextMenuBug")
 }
 
 /**
@@ -68,7 +68,7 @@ target("sampleUrl") {
  *
  * This requires ant to be installed.
  */
-target("monkeytester") {
+target("monkeytesterGit") {
     /**
      * If you want to clone the project to a temp dir, you can use this
      */
