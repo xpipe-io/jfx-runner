@@ -56,7 +56,7 @@ for (def mod in jfxModules.entrySet()) {
     }
 
     compileJava {
-        finalizedBy(copyTask)
+        dependsOn(copyTask)
     }
 }
 
