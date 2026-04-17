@@ -1,6 +1,5 @@
 import java.util.stream.Collectors
 
-
 def configProps = new Properties()
 try (def reader = file("$rootDir/config.properties").newReader()) {
     configProps.load(reader)

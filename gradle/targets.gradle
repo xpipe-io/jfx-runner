@@ -1,5 +1,3 @@
-import java.util.function.Consumer
-
 interface JfxTarget {
 
     File prepareDirectory();
@@ -110,11 +108,13 @@ def externalFile(File external) {
 }
 
 def fetchSourceDirectory(String srcDir, String mainClass, Closure<File> c) {
+    def fileResult = null;
     configuredTarget = new JfxTarget() {
 
         @Override
         File prepareDirectory() {
-            def dir = file("${c.call()}/${srcDir != null ? srcDir : ""}")
+            def r = fileResult != null ? fileResult : (fileResult = c.call())
+            def dir = file("${r}/${srcDir != null ? srcDir : ""}")
             if (!dir.isDirectory()) {
                 throw new IllegalArgumentException("Unable to find directory $dir")
             }
@@ -138,7 +138,8 @@ def fetchSourceDirectory(String srcDir, String mainClass, Closure<File> c) {
 
         @Override
         boolean requiresLauncher() {
-            def sourceFile = file("${c.call()}/${srcDir != null ? srcDir : ""}/${mainClass.replaceAll("\\.", "/")}.java")
+            def r = fileResult != null ? fileResult : (fileResult = c.call())
+            def sourceFile = file("${r}/${srcDir != null ? srcDir : ""}/${mainClass.replaceAll("\\.", "/")}.java")
             def sourceText = sourceFile.text
             def isApplication = sourceText.contains("extends Application")
             return isApplication
@@ -155,11 +156,13 @@ def externalGradleProject(File dir, String runTask) {
 }
 
 def fetchGradleProject(String runTask, Closure<File> c) {
+    def fileResult = null;
     configuredTarget = new JfxTarget() {
 
         @Override
         File prepareDirectory() {
-            def dir = c.call()
+            def r = fileResult != null ? fileResult : (fileResult = c.call())
+            def dir = r
             if (!dir.isDirectory()) {
                 throw new IllegalArgumentException("Unable to find directory $dir")
             }

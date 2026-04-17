@@ -19,10 +19,8 @@ clean {
     dependsOn(gradle.includedBuild('jfx').task(":clean"))
 }
 
-def targetDir = activeTarget.prepareDirectory()
-
 if (activeTarget.includeProject()) {
-    def projectName = targetDir.name
+    def projectName = activeTargetDir.name
     def task = activeTarget.getIncludedProjectRunTask()
     if (task != null) {
         run {
@@ -37,42 +35,40 @@ if (activeTarget.includeProject()) {
 
 // JavaFX does not place the generated jars at the default location in build/libs
 // This throws off gradle, so we have to fix it
-// TODO: Run this at the proper time
-tasks.register('fixJfxLibs', DefaultTask) {
-    dependsOn(gradle.includedBuild('jfx').task(":sdk"))
+for (def mod in jfxModules.entrySet()) {
+    def os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem
+    def javafxPlatform = null
+    if (os.isWindows()) {
+        javafxPlatform = 'win'
+    } else if (os.isLinux()) {
+        javafxPlatform = 'linux'
+    } else if (os.isMacOsX()) {
+        javafxPlatform = 'mac'
+    }
 
-    doLast {
-        def os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem
-        def javafxPlatform = null
-        if (os.isWindows()) {
-            javafxPlatform = 'win'
-        } else if (os.isLinux()) {
-            javafxPlatform = 'linux'
-        } else if (os.isMacOsX()) {
-            javafxPlatform = 'mac'
-        }
+    def platformClassifier = javafxPlatform
+    if (System.getProperty ("os.arch") == 'aarch64') {
+        platformClassifier += '-aarch64'
+    }
 
-        def platformClassifier = javafxPlatform
-        if (System.getProperty ("os.arch") == 'aarch64') {
-            platformClassifier += '-aarch64'
-        }
+    def copyTask = tasks.register("fix${mod.getValue().replaceAll("\\.", "")}Libs", org.gradle.api.tasks.Copy) {
+        dependsOn(gradle.includedBuild("jfx").task(":sdk"))
 
-        for (def mod in jfxModules.entrySet()) {
-            copy {
-                from "$jfxDir/build/publications/${mod.key}-${platformClassifier}.jar"
-                into "$jfxDir/modules/${mod.key}/build/libs/"
-                rename "${mod.key}-win.jar", "${mod.value}.jar"
-            }
-        }
+        from "$jfxDir/build/publications/${mod.key}-${platformClassifier}.jar"
+        into "$jfxDir/modules/${mod.key}/build/libs/"
+        rename "${mod.key}-win.jar", "${mod.value}.jar"
+    }
+
+    compileJava {
+        dependsOn(copyTask)
     }
 }
 
 compileJava {
     dependsOn(gradle.includedBuild('jfx').task(":sdk"))
-    dependsOn(tasks.fixJfxLibs)
 }
 
-if (activeTargetCustomRun == null && !activeTarget.includeProject() && targetDir != null && targetDir.exists()) {
+if (activeTargetCustomRun == null && !activeTarget.includeProject() && activeTargetDir != null && activeTargetDir.exists()) {
     // Create custom launcher class to prevent this issue:
     // https://stackoverflow.com/questions/78501081/how-do-i-fix-error-javafx-runtime-components-are-missing-and-are-required-to-r
     if (activeTarget.requiresLauncher()) {
@@ -120,7 +116,7 @@ public class Launcher {
     sourceSets {
         main {
             java {
-                srcDir(targetDir)
+                srcDir(activeTargetDir)
             }
         }
     }
@@ -170,7 +166,7 @@ else if (activeTargetCustomRun != null) {
         actions.clear()
         doLast {
             println("Running custom exec")
-            activeTargetCustomRun(targetDir, jfxDir)
+            activeTargetCustomRun(activeTargetDir, jfxDir)
         }
     }
 }
