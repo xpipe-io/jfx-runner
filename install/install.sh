@@ -17,7 +17,11 @@ install() {
   case "$uname_str" in
   Linux)
     if [ -f "/etc/debian_version" ]; then
-      xargs sudo apt install < "$dir/debian_packages.txt"
+      cat "$dir/debian_packages.txt" | while read line
+      do
+        echo "+ sudo apt install $line"
+        sudo apt install $line
+      done
     fi
     ;;
   Darwin)
