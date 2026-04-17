@@ -93,6 +93,13 @@ target("monkeytesterGit") {
         // Use parent dir as srcDir is in /src/
         // Starting ant on Windows from gradle is weird with multiple suitable scripts
         exec(srcDir.parentFile, true, os.isWindows() ? "ant.bat" : "ant", "-Djavafx.home=\"$jfxDir/build/sdk\"")
-        exec(srcDir.parentFile, true, "java", "-p", "\"$jfxDir/build/sdk/lib\"", "--add-modules", "ALL-MODULE-PATH", "-jar", "$srcDir.parentFile/build/jars/MonkeyTester.jar")
+        exec(srcDir.parentFile, true, "java", "-p", "$jfxDir/build/sdk/lib", "--add-modules", "ALL-MODULE-PATH", "-jar", "$srcDir.parentFile/build/jars/MonkeyTester.jar")
     }
 }
+
+target("jabref") {
+    fetchGradleProject(":run") {
+        checkoutGit("https://github.com/JabRef/jabref", "main")
+    }
+}
+
