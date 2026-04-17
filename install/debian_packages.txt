@@ -1,5 +1,6 @@
 pkg-config
-libavformat-ffmpeg57
+ffmpeg
+libavformat-dev
 libgl1-mesa-dev
 libx11-dev
 pkg-config
