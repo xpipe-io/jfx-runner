@@ -13,14 +13,14 @@ ext {
 }
 
 def local(File dir) {
-    if (!dir.isDirectory()) {
-        throw new IllegalArgumentException("Directory " + dir + " does not exist")
-    }
-
     configuredSource = new JfxSource() {
 
         @Override
         File queryLocation() {
+            if (!dir.isDirectory()) {
+                throw new IllegalArgumentException("Directory " + dir + " does not exist")
+            }
+
             return dir
         }
     }

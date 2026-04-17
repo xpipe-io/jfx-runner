@@ -69,14 +69,14 @@ def sourceFile(String cls) {
 }
 
 def externalFile(File external) {
-    if (!external.isFile()) {
-        throw new IllegalArgumentException("Unable to find external file $external")
-    }
-
     configuredTarget = new JfxTarget() {
 
         @Override
         File prepareDirectory() {
+            if (!external.isFile()) {
+                throw new IllegalArgumentException("Unable to find external file $external")
+            }
+
             def content = external.text
             def pkg = getPackage(content)
             def base = external.toString().substring(0, external.toString().length() - (pkg.length() + 1 + external.name.length()))
