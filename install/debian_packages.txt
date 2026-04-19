@@ -9,3 +9,12 @@ git
 libgtk2.0-dev
 libgtk-3-dev
 libxxf86vm-dev
+ant
+cmake
+perl
+ruby
+gperf
+libxt-dev
+libxtst-dev
+gcc-14
+g++-14

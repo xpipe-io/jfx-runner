@@ -97,14 +97,17 @@ target("monkeytesterGit") {
     }
 }
 
-target("jabrefGit") {
-    fetchGradleProject(":run") {
-        checkoutGit("https://github.com/JabRef/jabref", "main")
-    }
-}
-
 target("xpipeGit") {
     fetchGradleProject(":app:run") {
         checkoutGit("https://github.com/xpipe-io/xpipe", "master")
+    }
+}
+
+/**
+ * TODO: This does not work for some reason, the dependencies are not substituted properly
+ */
+target("jabrefGit") {
+    fetchGradleProject(":run") {
+        checkoutGit("https://github.com/JabRef/jabref", "main")
     }
 }

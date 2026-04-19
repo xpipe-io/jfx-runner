@@ -32,6 +32,7 @@ if (activeTarget.includeProject()) {
 
 // Fixes for windows 8.3 paths, see https://stackoverflow.com/questions/78185995/missing-externalproject-for
 includeBuild(jfxDir.toPath().toRealPath().toAbsolutePath().toString()) {
+    it.name = "jfx"
     dependencySubstitution {
         // Make gradle replace all declared JavaFX dependencies with locally built ones
         // See https://docs.gradle.org/current/userguide/composite_builds.html

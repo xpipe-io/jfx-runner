@@ -35,3 +35,16 @@ source("sampleJfxPrUrl") {
 source("sampleJfxPrId") {
     jfxPrId(2146)
 }
+
+/**
+ * Clone the jfx21u master branch into a temp dir
+ *
+ * Note that the build for this is broken as an included gradle project will run with the same version as this wrapper.
+ * Since the jfx21u project uses an older gradle version, it will cause errors.
+ * You can make this work by running this project with the correct gradle version manually instead of the wrapper.
+ */
+source("jfx21u") {
+    fetch {
+        checkoutGit("https://github.com/openjdk/jfx21u/", "master")
+    }
+}
