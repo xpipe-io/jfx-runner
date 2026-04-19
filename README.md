@@ -4,7 +4,7 @@ This project aims to solve the task of running and manually testing various buil
 
 ## The problem
 
-Up until now, this process was quite tedious, especially when doing this across multiple systems:
+Up until now, the process of manual testing was quite tedious, especially when doing this across multiple systems:
 
 - Limited IDE and debugger integrations when running a custom JavaFX build and external applications/programs outside the jfx repo. To fix this, you would have to do a lot of IDE-specific setup
 - Launcher issues when not using a module path and having the main class and Application class being the same
@@ -29,8 +29,8 @@ The jfx-runner project solves all these issues and allows you to build and run j
 
 - Clone this repository. Fork this template to set your own configurations that you want to use
 - Make sure to have a compatible JDK installed, depending on which JavaFX version you want to use. [sdkman](https://sdkman.io/) is recommended for that
-- Edit the `config.properties` file to select the jfx source and application target you want to use
-- If you want to see available sources and targets or add custom ones, take a look at the `source.gradle` and `target.gradle` files
+- Edit the [config.properties](/config.properties) file to select the jfx source and application target you want to use
+- If you want to see available sources and targets or add custom ones, take a look at the [source.gradle](/source.gradle) and [target.gradle](/target.gradle) files
 
 ### IDEs
 
@@ -47,7 +47,7 @@ Run the command `./gradlew run` in your terminal.
 
 ## Configuration
 
-You are able to define your own jfx sources and application targets that you can combine any way you like. Jfx sources are defined the in the [source.sgradle](/source.gradle) file with the following DSL:
+You are able to define your own jfx sources and application targets that you can combine any way you like. Jfx sources are defined the in the [source.gradle](/source.gradle) file with the following DSL:
 
 ```groovy
 source("jfx") {
@@ -58,7 +58,9 @@ source("jfx") {
         checkoutGit("https://github.com/openjdk/jfx/", "master")
     }
 }
+```
 
+```groovy
 /**
  * If you have a local clone, you can use this one instead
  */
@@ -70,21 +72,27 @@ source("sampleJfxLocal") {
      */
     buildProperties("COMPILE_WEBKIT=true")
 }
+```
 
+```groovy
 /**
  * This helper method allows you to directly clone a specific pull request branch
  */
 source("sampleJfxPrUrl") {
     jfxPrUrl("https://github.com/openjdk/jfx/pull/2145")
 }
+```
 
+```groovy
 /**
  * Alternatively, you can just specify the PR ID
  */
 source("sampleJfxPrId") {
     jfxPrId(2146)
 }
+```
 
+```groovy
 /**
  * Use the jfx21u master branch
  */
@@ -95,7 +103,7 @@ source("jfx21u") {
 }
 ```
 
-You can then combine any of the sources with an application target to run. These are defined in the [target.sgradle](/target.gradle) file with the following DSL:
+You can then combine any of the sources with an application target to run. These are defined in the [target.gradle](/target.gradle) file with the following DSL:
 
 ```groovy
 /**
@@ -104,7 +112,9 @@ You can then combine any of the sources with an application target to run. These
 target("sampleApp") {
     sourceFile("io.xpipe.jfx_runner.SampleApp")
 }
+```
 
+```groovy
 /**
  * Includes a directory in the source set and launches the selected main class.
  * This allows for imports to resolve in case the main class references other classes in the src dir
@@ -112,7 +122,9 @@ target("sampleApp") {
 target("sampleExternalSourceDirectory") {
     externalSourceDirectory(file("C:\\Projects\\javafx-test\\src\\main\\java"), "com.crschnick.javafxtest.ContextMenuBug")
 }
+```
 
+```groovy
 /**
  * Includes an external gradle project directory into this project and launches the specified task to run it
  *
@@ -121,7 +133,9 @@ target("sampleExternalSourceDirectory") {
 target("sampleExternalGradleProject") {
     externalGradleProject(file("C:\\Projects\\xpipe\\kickstartfx"), ":app:run")
 }
+```
 
+```groovy
 /**
  * Pull a remote git ref, adds the src dir in it to the sources, and runs the main class.
  */
@@ -130,14 +144,18 @@ target("sampleFetchSourceDirectory") {
         checkoutGit("https://github.com/andy-goryachev-oracle/Test", "main")
     }
 }
+```
 
+```groovy
 /**
  * Downloads a source file from a URL, adds it to the src, and runs the class.
  */
 target("sampleUrl") {
     urlFile("https://github.com/andy-goryachev-oracle/Test/blob/main/src/goryachev/bugs/AbstractPrimaryTimer_PoorAnimation_8339606.java")
 }
+```
 
+```groovy
 /**
  * Runs the monkey tester application from https://github.com/andy-goryachev-oracle/MonkeyTest
  *
