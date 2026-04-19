@@ -111,6 +111,11 @@ You can then combine any of the sources with an application target to run. These
  */
 target("sampleApp") {
     sourceFile("io.xpipe.jfx_runner.SampleApp")
+
+    /**
+     * Pass custom jvm options to the application
+     */
+    jvmArgs("-Dprism.order=sw")
 }
 ```
 
@@ -165,13 +170,15 @@ target("monkeytesterGit") {
     fetchSourceDirectory("src", "com.oracle.tools.fx.monkey.MonkeyTesterApp") {
         checkoutGit("https://github.com/andy-goryachev-oracle/MonkeyTest", "main")
     }
-
-    customExec { File srcDir, File jfxDir ->
-        def os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem
+    
+    customExec { File srcDir, File jfxDir, List<String> jvmArgs ->
+        def os = DefaultNativePlatform.currentOperatingSystem
         // Use parent dir as srcDir is in /src/
         // Starting ant on Windows from gradle is weird with multiple suitable scripts
         exec(srcDir.parentFile, true, os.isWindows() ? "ant.bat" : "ant", "-Djavafx.home=\"$jfxDir/build/sdk\"")
-        exec(srcDir.parentFile, true, "java", "-p", "$jfxDir/build/sdk/lib", "--add-modules", "ALL-MODULE-PATH", "-jar", "$srcDir.parentFile/build/jars/MonkeyTester.jar")
+
+        def commandLine = (["java"] + jvmArgs + ["-p", "$jfxDir/build/sdk/lib", "--add-modules", "ALL-MODULE-PATH", "-jar", "$srcDir.parentFile/build/jars/MonkeyTester.jar"]) as String[]
+        exec(srcDir.parentFile, true, commandLine)
     }
 }
 ```

@@ -126,6 +126,13 @@ public class Launcher {
     }
 }
 
+// These options are needed for any JavaFX program
+def defaultJvmArgs = [
+        "--enable-native-access=ALL-UNNAMED",
+        "--sun-misc-unsafe-memory-access=allow",
+        "-Djavafx.enablePreview=true"
+]
+
 if (activeTargetCustomRun == null && activeTarget.runWithinGradle()) {
     dependencies {
         for (def mod in jfxModules.entrySet()) {
@@ -134,13 +141,6 @@ if (activeTargetCustomRun == null && activeTarget.runWithinGradle()) {
             implementation files("$jfxDir/build/sdk/lib/${mod.key}.jar")
         }
     }
-
-    // These options are needed for any JavaFX program
-    def defaultJvmArgs = [
-            "--enable-native-access=ALL-UNNAMED",
-            "--sun-misc-unsafe-memory-access=allow",
-            "-Djavafx.enablePreview=true"
-    ]
 
     application {
         if (activeTarget.requiresLauncher()) {
@@ -162,7 +162,7 @@ else if (activeTargetCustomRun != null) {
         actions.clear()
         doLast {
             println("Running custom exec")
-            activeTargetCustomRun(activeTargetDir, jfxDir)
+            activeTargetCustomRun(activeTargetDir, jfxDir, activeTargetJvmArgs + defaultJvmArgs)
         }
     }
 }
