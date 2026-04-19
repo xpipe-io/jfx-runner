@@ -1,8 +1,10 @@
-## JFX-Runner
+# JFX-Runner
 
 This project aims to solve the task of running and manually testing various builds and PRs for the [JavaFX repo](https://github.com/openjdk/jfx) with many different test programs and applications.
 
-Up until now, this process was quite tedious, especially when doing this across multiple systems, and had some limitations:
+## The problem
+
+Up until now, this process was quite tedious, especially when doing this across multiple systems:
 
 - Limited IDE and debugger integrations when running a custom JavaFX build and external applications/programs outside the jfx repo. To fix this, you would have to do a lot of IDE-specific setup
 - Launcher issues when not using a module path and having the main class and Application class being the same
@@ -10,6 +12,8 @@ Up until now, this process was quite tedious, especially when doing this across 
 - You have to manually check out the respective branches each time and build them
 - More complex projects that use maven dependencies for JavaFX have to be manually adjusted to use the local JavaFX build jars
 - On newly created test systems like VMs, everything has to be set up again
+
+## The solution
 
 The jfx-runner project solves all these issues and allows you to build and run jfx with any kind of target program in one action. It has the following features:
 
@@ -23,7 +27,7 @@ The jfx-runner project solves all these issues and allows you to build and run j
 
 ## Usage
 
-- Clone this repository
+- Clone this repository. Fork this template to set your own configurations that you want to use
 - Make sure to have a compatible JDK installed, depending on which JavaFX version you want to use. [sdkman](https://sdkman.io/) is recommended for that
 - Edit the `config.properties` file to select the jfx source and application target you want to use
 - If you want to see available sources and targets or add custom ones, take a look at the `source.gradle` and `target.gradle` files
@@ -32,7 +36,8 @@ The jfx-runner project solves all these issues and allows you to build and run j
 
 If you plan on using an IDE, e.g. for a debugger and source code view, then you can just open the project in your IDE. If the gradle integration of the IDE works properly, all JavaFX sources and target projects should automatically be added.
 
-Since the source and target codebase retrieval of any potential external sources is run during the gradle settings initialization phase, the import might take a while. Refreshing the gradle tasks in an IDE will also take some time for the same reason.
+> [!NOTE]
+> Since the source and target codebase retrieval of any potential external sources is run during the gradle settings initialization phase, the import might take a while. Refreshing the gradle tasks in an IDE will also take some time for the same reason.
 
 After the gradle project is opened, execute the `run` task of the application plugin for the `jfx-runner` project.
 
@@ -44,7 +49,7 @@ Run the command `./gradlew run` in your terminal.
 
 You are able to define your own jfx sources and application targets that you can combine any way you like. Jfx sources are defined the in the [source.sgradle](/source.gradle) file with the following DSL:
 
-```
+```groovy
 source("jfx") {
     fetch {
         /**
@@ -92,7 +97,7 @@ source("jfx21u") {
 
 You can then combine any of the sources with an application target to run. These are defined in the [target.sgradle](/target.gradle) file with the following DSL:
 
-```
+```groovy
 /**
  * Launches an Application (does not have a main method) in the local src
  */
