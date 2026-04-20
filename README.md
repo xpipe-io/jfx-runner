@@ -27,7 +27,7 @@ The jfx-runner project solves all these issues and allows you to build and run j
 
 ## Usage
 
-- Clone this repository. Fork this template to set your own configurations that you want to use
+- Clone this repository. Fork this repository to set your own configurations that you want to use
 - Make sure to have a compatible JDK installed, depending on which JavaFX version you want to use. [sdkman](https://sdkman.io/) is recommended for that
 - Edit the [config.properties](/config.properties) file to select the jfx source and application target you want to use
 - If you want to see available sources and targets or add custom ones, take a look at the [source.gradle](/source.gradle) and [target.gradle](/target.gradle) files
