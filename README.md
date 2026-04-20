@@ -8,8 +8,8 @@ Up until now, the process of manual testing was quite tedious, especially when d
 
 - Limited IDE and debugger integrations when running a custom JavaFX build and external applications/programs outside the jfx repo. To fix this, you would have to do a lot of IDE-specific setup
 - Launcher issues when not using a module path and having the main class and Application class being the same
-- If custom build properties are used, you will have to remember setting them each time
 - You have to manually check out the respective branches each time and build them
+- If custom build properties are used, you will have to remember to update them each time you switch test cases/branches again
 - More complex projects that use maven dependencies for JavaFX have to be manually adjusted to use the local JavaFX build jars
 - On newly created test systems like VMs, everything has to be set up again
 
@@ -21,7 +21,7 @@ The jfx-runner project solves all these issues and allows you to build and run j
 - Automatically clones any needed repos and switches to the correct branches in a separate location to not interfere with your normal development setup
 - Automatic generation of any needed launcher classes to run an Application without a module path
 - Support to run single files, source directories, and entire gradle projects. Both locally and remote via the git + URL fetch support
-- The dependencies of any used gradle projects are automatically substituted with the locally built jfx libraries
+- The dependencies of any used gradle projects are automatically substituted with the locally built jfx libraries. Allows seamless testing of larger real-world JavaFX projects
 - Automatically configures and updates any defined build properties for the jfx gradle build
 - Create your own reusable configurations for your own testing setups
 
