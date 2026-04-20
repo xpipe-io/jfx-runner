@@ -136,9 +136,7 @@ def defaultJvmArgs = [
 if (activeTargetCustomRun == null && activeTarget.runWithinGradle()) {
     dependencies {
         for (def mod in jfxModules.entrySet()) {
-            // We need both to make IDEs and compilation work
             implementation ("org.openjfx:${mod.key.replaceAll("\\.", "-")}")
-            implementation files("$jfxDir/build/sdk/lib/${mod.key}.jar")
         }
     }
 
