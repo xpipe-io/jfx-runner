@@ -41,6 +41,9 @@ If you plan on using an IDE, e.g. for a debugger and source code view, then you 
 
 After the gradle project is opened, execute the `run` task of the application plugin for the `jfx-runner` project.
 
+> [!NOTE]
+> The build status output is printed during the grade initialization and the gradle build phase. To see what is currently going on, open the build output window in your IDE
+
 ### Terminal
 
 Run the command `./gradlew run` in your terminal.
