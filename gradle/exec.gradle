@@ -46,7 +46,7 @@ def checkoutGit(String repo, String ref) {
         }
         exec(tempDir, true, "git", "fetch", "--tags", "--prune", "--prune-tags")
         exec(tempDir, true, "git", "checkout", ref)
-        exec(tempDir, true, "git", "pull", "--recurse-submodules", "--depth=10", "origin", ref)
+        exec(tempDir, true, "git", "pull", "--recurse-submodules", "--rebase", "--depth=10", "origin", ref)
         exec(tempDir, true, "git", "checkout", ref)
     }
     return tempDir
